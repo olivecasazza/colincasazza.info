@@ -14,7 +14,10 @@
     "skipLibCheck": true,
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
-    "paths": {}
+    "paths": {
+      "@theme": ["libs/theme/src/index.ts"],
+      "@wasm-lib": ["libs/wasm-lib/src/index.ts"]
+    }
   },
   "exclude": ["node_modules", "tmp"]
 }

@@ -1,5 +1,9 @@
 {
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
-  "projects": {}
+  "projects": {
+    "colincasazza.info": "apps/colincasazza.info",
+    "theme": "libs/theme",
+    "wasm-lib": "libs/wasm-lib"
+  }
 }
