@@ -1,16 +1,18 @@
+<!-- eslint-disable @intlify/vue-i18n/no-raw-text -->
 <template>
   <div class="app-view-port home-wrapper">
     <div class="app-title">colin casazza</div>
     <div class="text-lx mb-4 select-text">
       <div>colanzio5@gmail.com</div>
       <div>san diego, ca</div>
-      <div>(603)714-2047</div>
-      <div class="link w-min" href="https://github.com/colanzio5">
+      <div>(603) 714-2047</div>
+      <a class="w-min link" href="https://github.com/colanzio5">
         github.com/colanzio5
-      </div>
-      <div class="link w-min" href="https://www.linkedin.com/in/ccasazza/">
+      </a>
+      <br />
+      <a class="link w-min" href="https://www.linkedin.com/in/ccasazza/">
         linkedin.com/in/ccasazza
-      </div>
+      </a>
     </div>
     <div class="app-title">about me</div>
     <div class="mb-4">
@@ -42,14 +44,14 @@
   </div>
 </template>
 
+<script lang="ts">
+import { Vue } from 'vue-class-component';
+
+export default class HomeView extends Vue {}
+</script>
+
 <style lang="postcss">
 .home-wrapper {
   @apply select-none pt-4 text-white w-full h-full;
 }
 </style>
-
-<script lang="ts">
-import { Vue } from "vue-class-component";
-
-export default class HomeView extends Vue {}
-</script>

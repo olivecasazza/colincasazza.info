@@ -1,11 +1,26 @@
 {
-  "name": "colincasazza.info.next",
-  "version": "0.0.0",
-  "license": "MIT",
-  "scripts": {
-    "nx": "nx"
+  "dependencies": {
+    "@nrwl/next": "^14.6.1",
+    "@originjs/vite-plugin-commonjs": "^1.0.3",
+    "@sampullman/fetch-api": "^0.7.0",
+    "@simondotm/nx-firebase": "^0.3.3",
+    "dat.gui": "^0.7.7",
+    "date-fns": "^2.29.1",
+    "deps": "^1.0.0",
+    "firebase-admin": "latest",
+    "firebase-functions": "latest",
+    "notebookjs": "^0.6.7",
+    "postcss-cli": "^10.0.0",
+    "three": "^0.139.2",
+    "vue": "^3.2.37",
+    "vue-class-component": "^8.0.0-rc.1",
+    "vue-i18n": "^9.2.2",
+    "vue-property-decorator": "10.0.0-rc.3",
+    "vue-router": "^4.1.3",
+    "vuex": "^4.0.2",
+    "vuex-class-component": "^2.3.6",
+    "weighted-array": "^0.2.0"
   },
-  "private": true,
   "devDependencies": {
     "@babel/core": "^7.18.10",
     "@babel/plugin-transform-modules-commonjs": "^7.18.6",
@@ -62,20 +77,12 @@
     "vite": "^3.0.7",
     "vite-plugin-wasm-pack": "^0.1.12",
     "vue-eslint-parser": "^9.0.3"
- 
   },
-  "dependencies": {
-    "@nrwl/next": "^14.6.1",
-    "@nxext/vite": "^14.0.3",
-    "@sampullman/fetch-api": "^0.7.0",
-    "@simondotm/nx-firebase": "^0.3.3",
-    "date-fns": "^2.29.1",
-    "deps": "^1.0.0",
-    "firebase-admin": "latest",
-    "firebase-functions": "latest",
-    "postcss-cli": "^10.0.0",
-    "vue": "^3.2.37",
-    "vue-i18n": "^9.2.2",
-    "vue-router": "^4.1.3"
-  }
+  "license": "MIT",
+  "name": "colincasazza.info.next",
+  "private": true,
+  "scripts": {
+    "nx": "nx"
+  },
+  "version": "0.0.0"
 }

@@ -1,4 +1,4 @@
-import { themeColors } from '@libs/theme/src/lib/colors';
+import { themeColors } from '@theme/src/lib/colors';
 import {
   DEFAULT_BIRD_ID,
   generateBirdId,
@@ -7,8 +7,8 @@ import {
 } from '@app/views/background/background';
 import { Color } from 'three';
 import { action, createModule } from 'vuex-class-component';
-import { BirdConfig, Flock } from '@libs/wasm-lib/pkg';
-import init from  '@libs/wasm-lib/pkg';
+import { BirdConfig, Flock } from '@wasm-lib';
+import init from '@wasm-lib';
 import * as WeightedArray from 'weighted-array';
 
 const { select } = WeightedArray;

@@ -1,10 +1,8 @@
 <script lang="ts">
-import { Vue, Options } from "vue-class-component";
+import { Vue } from "vue-class-component";
 import { Prop } from "vue-property-decorator";
-Options({
-  name: "JupyterNotebook",
-});
-export default class JupyterNotebook extends Vue {
+
+export default class NotebookWrapper extends Vue {
   @Prop() notebookPath!: string;
 
   get iFrame(): HTMLIFrameElement {
@@ -15,8 +13,8 @@ export default class JupyterNotebook extends Vue {
 
 <template>
   <iframe
-    :src="notebookPath"
     :ref="notebookPath"
+    :src="notebookPath"
     sandbox="allow-same-origin allow-scripts"
     class="w-full h-full app-view-port"
   ></iframe>

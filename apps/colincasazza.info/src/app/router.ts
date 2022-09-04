@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@app/views/HomeView.vue';
 import Projects from '@app/views/ProjectsWrapper.vue';
 import BackgroundGUI from '@app/views/background/BackgroundGUI.vue';
+import NotebookWrapper from '@app/components/NotebookWrapper.vue';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -28,6 +29,7 @@ const router = createRouter({
     return { top: 0 };
   },
   routes: [
+    // colincasazza.info routes
     {
       path: '/',
       name: 'Home',
@@ -45,8 +47,14 @@ const router = createRouter({
       name: "Flock",
       component: BackgroundGUI,
       meta: { title: 'colincasazza.info.flock' },
-
     },
+    {
+      path: "/projects/notebooks/2d-inverse-kinematics",
+      component: NotebookWrapper,
+      name: "IKNotebook",
+      props: { notebookPath: "/notebooks/Inverse Kinematics Approximation.html" },
+    },
+    // external routes to projects
   ],
 });
 

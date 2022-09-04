@@ -10,6 +10,7 @@ declare module '@vue/runtime-core' {
     AppLogo: typeof import('./src/app/components/widgets/AppLogo.vue')['default']
     Cookies: typeof import('./src/app/components/Cookies.vue')['default']
     JupyterNotebook: typeof import('./src/app/components/JupyterNotebook.vue')['default']
+    NotebookWrapper: typeof import('./src/app/components/NotebookWrapper.vue')['default']
     RendererRootViewPortComponent: typeof import('./src/app/components/renderer/RendererRootViewPortComponent.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

@@ -1,6 +1,6 @@
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
-import { vxm } from "../store";
+import { Options, Vue } from 'vue-class-component';
+import { vxm } from '../store';
 
 @Options({
   inheritAttrs: false,
@@ -8,7 +8,7 @@ import { vxm } from "../store";
 export default class Footer extends Vue {
   mounted() {
     vxm.renderer.initStats({
-      container: document.getElementById("stats-container") as HTMLElement,
+      container: document.getElementById('stats-container') as HTMLElement,
     });
   }
 }
@@ -18,7 +18,7 @@ export default class Footer extends Vue {
   <div class="app-view-port w-full flex flex-row whitespace-nowrap text-xs">
     <div class="self-center max-w-sm app-view-port">
       <div class="scroll-text text-white">
-        <span v-if="$route.name === 'HomeView'">
+        <span v-if="$route.name === 'Home'">
           like the background? click
           <router-link to="/projects/three/flock" class="link">
             <span class="rainbow-text-animated">here</span></router-link
@@ -26,11 +26,11 @@ export default class Footer extends Vue {
         </span>
         <span v-else>
           source code to projects can be found at
-          <span
-            class="link"
-            href="https://github.com/colanzio5/colincasazza.info"
-          >
-            <a class="rainbow-text-animated">
+          <span class="link">
+            <a
+              href="https://github.com/colanzio5/colincasazza.info"
+              class="rainbow-text-animated"
+            >
               https://github.com/colanzio5/colincasazza.info
             </a>
           </span>
@@ -38,6 +38,6 @@ export default class Footer extends Vue {
       </div>
     </div>
     <div class="flex-grow"></div>
-    <div class="justify-end min-w-fit overflow-clip" id="stats-container"></div>
+    <div id="stats-container" class="justify-end min-w-fit overflow-clip"></div>
   </div>
 </template>

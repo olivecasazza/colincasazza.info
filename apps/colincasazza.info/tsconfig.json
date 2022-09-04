@@ -11,7 +11,8 @@
       "@assets/*": ["./src/assets/*"],
       "@app/*": ["./src/app/*"],
       "@public/*": ["./src/public/*"],
-      "@libs/*": ["../../libs"]
+      "@theme/*": ["../../libs/theme"],
+      "@wasm-lib/*": ["../../libs/wasm-lib/pkg"]
     }
   },
   "references": [
