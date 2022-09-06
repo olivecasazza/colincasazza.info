@@ -1,5 +1,5 @@
 declare module "colors.cjs" {
-  export default IThemeColors;
+  export const IThemeColors;
 }
 
 export interface IThemeColors {

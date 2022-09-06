@@ -1,4 +1,4 @@
-import { themeColors } from '@theme/src/lib/colors';
+import themeColors from '@theme/src/lib/colors.cjs';
 import {
   DEFAULT_BIRD_ID,
   generateBirdId,
