@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router';
 import GamesList from '@app/views/GamesList.vue';
 import GameWrapper from '@app/views/GameWrapper.vue';
 import UserProfile from '@app/views/UserProfile.vue';
+import { vxm } from './store';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -30,20 +31,31 @@ const router = createRouter({
   routes: [
     {
       path: '/user',
-      name: 'UserProfile',
+      name: 'user',
       component: UserProfile,
     },
     {
       path: '/games',
-      name: 'GamesList',
+      name: 'games',
       component: GamesList,
     },
     {
       path: '/game/:id',
-      name: 'GameWrapper',
+      name: 'game',
       component: GameWrapper,
     },
+    {
+      // path: "*",
+      path: '/:catchAll(.*)',
+      redirect: '/games',
+    },
   ],
+});
+
+router.beforeEach((to, _from) => {
+  if (to.name == 'game' && !vxm.activeGame.isLoaded) {
+    router.replace({ name: 'games' });
+  }
 });
 
 router.afterEach((to, _from) => {

@@ -13,7 +13,7 @@ export default defineConfig({
       '@app/': `${path.resolve(__dirname, './src/app')}/`,
       '@public/': `${path.resolve(__dirname, './src/public')}/`,
       '@theme/': `${path.resolve(__dirname, '../../libs/theme')}/`,
-      '@wasm-lib/': `${path.resolve(__dirname, '../../libs/wasm-lib/pkg')}/`,
+      '@wasm/': `${path.resolve(__dirname, '../../libs/wasm/pkg')}/`,
     },
   },
   publicDir: path.resolve(__dirname, './src/public'),
@@ -22,7 +22,7 @@ export default defineConfig({
     Components({
       dirs: ['src/app/components'],
     }),
-    wasmPack([`${path.resolve(__dirname, '../../libs/wasm-lib/')}/`,]), 
+    wasmPack([`${path.resolve(__dirname, '../../libs/wasm/')}/`,]), 
     viteCommonjs()
   ],
 });

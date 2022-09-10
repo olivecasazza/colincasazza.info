@@ -7,8 +7,8 @@ import {
 } from '@app/views/background/background';
 import { Color } from 'three';
 import { action, createModule } from 'vuex-class-component';
-import { BirdConfig, Flock } from '@wasm-lib';
-import init from '@wasm-lib';
+import { BirdConfig, Flock } from '@wasm';
+import init from '@wasm';
 import * as WeightedArray from 'weighted-array';
 
 const { select } = WeightedArray;

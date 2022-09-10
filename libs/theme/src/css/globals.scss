@@ -1,7 +1,6 @@
-@import "tailwindcss/base";
+@import 'tailwindcss/base';
 
 @layer base {
-  /* rainbow text animation */
   .rainbow-text-animated {
     background: linear-gradient(
       to right,

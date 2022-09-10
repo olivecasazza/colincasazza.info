@@ -12,7 +12,7 @@
       "@app/*": ["./src/app/*"],
       "@public/*": ["./src/public/*"],
       "@theme/*": ["../../libs/theme"],
-      "@wasm-lib/*": ["../../libs/wasm-lib/pkg"]
+      "@wasm/*": ["../../libs/wasm/pkg"]
     }
   },
   "references": [

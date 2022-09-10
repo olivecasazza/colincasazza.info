@@ -13,8 +13,9 @@ export default class GamesList extends Vue {
   }
 
   get availableGameTemplates(): IGameTemplateDbo[] {
+    const activeGameIds = vxm.gamesList.activeGames.map((ag) => ag.id);
     return vxm.gamesList.gameTemplates.filter((gt) =>
-      vxm.gamesList.activeGames.map((ag) => ag.id).includes(gt.id)
+      activeGameIds.includes(gt.id)
     );
   }
 
@@ -30,39 +31,39 @@ export default class GamesList extends Vue {
     );
   }
 
-  get isLoaded(): boolean {
-    return (
-      !!vxm.gamesList.gameTemplates.length && !!vxm.gamesList.activeGames.length
-    );
-  }
-
-  created() {
-    console.log(vxm.gamesList.gameTemplates);
-    console.log(vxm.gamesList.activeGames);
+  async created() {
+    await vxm.gamesList.load();
   }
 
   async beginUnstartedGame(gameTemplateId: string) {
-    await vxm.gamesList.beginUnstartedGame({
+    const newActiveGame = await vxm.gamesList.beginUnstartedGame({
       gameTemplateId,
       liveGameOwnerId: 'DefaultUser',
     });
+    await vxm.gamesList.unload();
+    await this.$router.push({ name: 'game', params: { id: newActiveGame.id } });
   }
 
-  async openInProgressGame(liveGameId: string) {
-    await vxm.gamesList.openInProgressGame({ liveGameId });
+  async openInProgressGame(activeGameId: string) {
+    await vxm.activeGame.setActiveLiveGame({
+      ownerId: 'Default',
+      activeGameId,
+    });
+    await vxm.gamesList.unload();
+    await this.$router.push({ name: 'game', params: { id: activeGameId } });
   }
 }
 </script>
 
 <template>
-  <div class="w-full h-full">
+  <div v-if="vxm.gamesList.isLoaded" class="w-full h-full">
     <!-- not started -->
-    <div v-if="isLoaded">
+    <div v-if="availableGameTemplates.length">
       <div class="underline text-white">start new game</div>
       <div
         v-for="gameTemplate in availableGameTemplates"
         :key="gameTemplate.id"
-        class="border border-white w-full p-2"
+        class="text-white border border-white hover:link w-full p-2"
         @click="beginUnstartedGame(gameTemplate.id)"
       >
         <div class="link">{{ gameTemplate.id }}</div>
@@ -70,25 +71,25 @@ export default class GamesList extends Vue {
     </div>
 
     <!-- in progress -->
-    <div v-if="isLoaded">
+    <div v-if="vxm.gamesList.activeGames.length">
       <div class="underline text-white">continue playing</div>
       <div
         v-for="liveGame in vxm.gamesList.activeGames"
         :key="liveGame.id"
-        class="border border-white w-full p-2"
+        class="text-white border border-white hover:link w-full p-2"
         @click="openInProgressGame(liveGame.id)"
       >
-        <div class="link">{{ liveGame }}</div>
+        <div>{{ liveGame }}</div>
       </div>
     </div>
 
     <!-- complete -->
-    <div v-if="isLoaded">
+    <div v-if="completedGames.length">
       <div class="underline text-white">completed games</div>
       <div
         v-for="gameTemplate in completedGames"
         :key="gameTemplate.id"
-        class="border border-white w-full p-2"
+        class="text-white border border-white hover:link w-full p-2"
       >
         <div>{{ gameTemplate.id }}</div>
       </div>

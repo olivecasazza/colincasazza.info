@@ -1,20 +1,20 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/wasm-lib/src",
+  "sourceRoot": "libs/wasm/src",
   "projectType": "library",
   "targets": {
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "outputs": ["{options.outputFile}"],
       "options": {
-        "lintFilePatterns": ["libs/wasm-lib/**/*.ts"]
+        "lintFilePatterns": ["libs/wasm/**/*.ts"]
       }
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/wasm-lib"],
+      "outputs": ["coverage/libs/wasm"],
       "options": {
-        "jestConfig": "libs/wasm-lib/jest.config.ts",
+        "jestConfig": "libs/wasm/jest.config.ts",
         "passWithNoTests": true
       }
     }

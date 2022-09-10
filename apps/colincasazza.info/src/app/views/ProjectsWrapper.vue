@@ -34,7 +34,7 @@ export default class ProjectsWrapper extends Vue {
           text: `simulated flocking behavior based on separation, alignment, and cohesion. implemented w/ rust/wasm, inspired by <a class='link' href='https://thecodingtrain.com/CodingChallenges/124-flocking-boids.html'>thecodingtrain.com<a/>.`,
           link: '/projects/three/flock',
           sourceCodeLink:
-            'https://github.com/colanzio5/colincasazza.info/tree/wasm-flock/wasm-lib/src/flock',
+            'https://github.com/colanzio5/colincasazza.info/tree/wasm-flock/wasm/src/flock',
         },
       ],
     },

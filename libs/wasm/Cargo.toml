@@ -1,7 +1,7 @@
 cargo-features = ["resolver"]
 
 [package]
-name = "wasm-lib"
+name = "wasm"
 version = "0.1.0"
 authors = ["Colin Casazza <colanzio5@gmail.com>"]
 edition = "2018"

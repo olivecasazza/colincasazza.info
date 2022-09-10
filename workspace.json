@@ -4,7 +4,7 @@
   "projects": {
     "colincasazza.info": "apps/colincasazza.info",
     "theme": "libs/theme",
-    "wasm-lib": "libs/wasm-lib",
+    "wasm": "libs/wasm",
     "xwords": "apps/xwords"
   }
 }
