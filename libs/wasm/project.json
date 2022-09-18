@@ -3,19 +3,29 @@
   "sourceRoot": "libs/wasm/src",
   "projectType": "library",
   "targets": {
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "outputs": ["{options.outputFile}"],
+    "build": {
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "lintFilePatterns": ["libs/wasm/**/*.ts"]
+        "cwd": "libs/wasm",
+        "commands": [
+          " wasm-pack build --debug -t web"
+        ]
+      },
+      "configurations": {
+        "production": {
+          "commands": [
+            " wasm-pack build -t web"
+          ]
+        }
       }
     },
     "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/wasm"],
+      "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "jestConfig": "libs/wasm/jest.config.ts",
-        "passWithNoTests": true
+        "cwd": "libs/wasm",
+        "commands": [
+          "wasm-pack test --chrome"
+        ]
       }
     }
   },

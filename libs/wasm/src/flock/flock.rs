@@ -21,7 +21,6 @@ impl Flock {
     pub fn get_current_flock_size(&self) -> usize {
         self.birds.clone().len()
     }
-
     pub fn add_bird_config(&mut self, config_id: String, bird_config: BirdConfig) {
         self.configs.insert(config_id, bird_config);
     }
@@ -30,6 +29,34 @@ impl Flock {
     }
     pub fn remove_bird_config(&mut self, config_id: String) {
         self.configs.remove(&config_id);
+    }
+
+    pub fn new(max_flock_size: usize, seed: u64) -> Flock {
+        Flock {
+            max_flock_size,
+            configs: HashMap::new(),
+            birds: kd_tree::KdTree2::build_by_ordered_float(Vec::new()),
+            rng: oorandom::Rand32::new(seed),
+        }
+    }
+
+    pub fn set_max_flock_size(&mut self, max_flock_size: usize) {
+        // if too many birds, remove randomly untill in size
+        if max_flock_size < self.birds.len() {
+            let mut new_birds = self.birds.to_vec();
+            for _ in 0..new_birds.len() - max_flock_size {
+                let idx = self.rng.rand_range(0..(new_birds.len()) as u32);
+                new_birds.remove(idx as usize);
+            }
+            self.birds = kd_tree::KdTree2::build_by_key(new_birds, |bird, k| {
+                ordered_float::OrderedFloat(bird.position[k])
+            });
+        }
+        self.max_flock_size = max_flock_size;
+    }
+
+    pub fn get_max_flock_size(&self) -> usize {
+        self.max_flock_size
     }
 
     pub fn add_bird_at_random_position(&mut self, config_id: String, width: f32, height: f32) {
@@ -73,34 +100,6 @@ impl Flock {
         self.birds = kd_tree::KdTree2::build_by_key(new_birds, |bird, k| {
             ordered_float::OrderedFloat(bird.position[k])
         });
-    }
-
-
-
-    pub fn new(max_flock_size: usize, seed: u64) -> Flock {
-        Flock {
-            max_flock_size,
-            configs: HashMap::new(),
-            birds: kd_tree::KdTree2::build_by_ordered_float(Vec::new()),
-            rng: oorandom::Rand32::new(seed),
-        }
-    }
-
-
-
-    pub fn set_max_flock_size(&mut self, max_flock_size: usize) {
-        // if too many birds, remove randomly untill in size
-        if max_flock_size < self.birds.len() {
-            let mut new_birds = self.birds.to_vec();
-            for _ in 0..new_birds.len() - max_flock_size {
-                let idx = self.rng.rand_range(0..(new_birds.len()) as u32);
-                new_birds.remove(idx as usize);
-            }
-            self.birds = kd_tree::KdTree2::build_by_key(new_birds, |bird, k| {
-                ordered_float::OrderedFloat(bird.position[k])
-            });
-        }
-        self.max_flock_size = max_flock_size;
     }
 
     // we could also pass a js closure that updates vertex buffer

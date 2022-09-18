@@ -30,7 +30,7 @@ export class BackgroundStore extends VuexModule {
   private _flock?: Flock;
 
   get maxFlockSize(): number {
-    return this._maxFlockSize;
+    return this._flock.get_current_flock_size();
   }
   set maxFlockSize(_maxFlockSize: number) {
     if (this._flock) this._flock.set_max_flock_size(_maxFlockSize);
