@@ -1,9 +1,9 @@
-import { generateUUID } from "three/src/math/MathUtils";
-import type { ICoordinates } from "./utils";
+import { generateUUID } from 'three/src/math/MathUtils';
+import type { ICoordinates } from './utils';
 
-export enum IQuestionDirectionEnum {
-  ACROSS = "ACROSS",
-  DOWN = "DOWN",
+export enum QuestionDirection {
+  ACROSS = 'ACROSS',
+  DOWN = 'DOWN',
 }
 
 export interface IQuestion {
@@ -11,7 +11,7 @@ export interface IQuestion {
   question: string;
   answer: string;
   root: ICoordinates;
-  direction: IQuestionDirectionEnum;
+  direction: QuestionDirection;
 }
 export interface IQuestionDbo extends IQuestion {
   id: string;
@@ -21,19 +21,19 @@ export class Question implements IQuestion {
   id: string = generateUUID();
   question: string;
   number: number;
-  direction: IQuestionDirectionEnum;
+  direction: QuestionDirection;
   answerMap: Map<ICoordinates, string>;
 
   static getCordAtAnswerIndex(q: IQuestion, index: number): ICoordinates {
     const cord = q.root;
-    q.direction == IQuestionDirectionEnum.ACROSS
+    q.direction == QuestionDirection.ACROSS
       ? (cord.x += index)
       : (cord.y += index);
     return cord;
   }
 
   get answer(): string {
-    return [...this.answerMap.values()].join("");
+    return [...this.answerMap.values()].join('');
   }
 
   get root(): ICoordinates {
@@ -42,16 +42,18 @@ export class Question implements IQuestion {
 
   constructor(props: IQuestion) {
     this.answerMap = new Map<ICoordinates, string>();
-    props.answer.split("").forEach((character, index) => {
+    props.answer.split('').forEach((character, index) => {
       let { x, y } = props.root;
-      props.direction == IQuestionDirectionEnum.ACROSS
-        ? (x += index)
-        : (y += index);
+      props.direction == QuestionDirection.ACROSS ? (x += index) : (y += index);
       this.answerMap.set({ x, y }, character);
     });
     this.question = props.question;
     this.number = props.number;
     this.direction = props.direction;
+  }
+
+  containsCoordinates(coordinates: ICoordinates): boolean {
+    return [...this.answerMap.keys()].some((c) => c === coordinates);
   }
 
   static ToDbo(question: Question): IQuestionDbo {

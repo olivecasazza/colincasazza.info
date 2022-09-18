@@ -1,49 +1,58 @@
 <script lang="ts">
 import { vxm } from '@app/store';
+import { Question } from '@app/utils/question';
+import { ICoordinates } from '@app/utils/utils';
 import { Options, Vue } from 'vue-class-component';
 
 @Options({
   inheritAttrs: false,
 })
 export default class GameBoard extends Vue {
-  get boardColumns(): number[] {
-    return [...Array(vxm.activeGame.boardSize.y).keys()];
-  }
-
-  get boardRows(): number[] {
-    return [...Array(vxm.activeGame.boardSize.x).keys()];
-  }
 
   get vxm() {
     return vxm;
   }
 
-  getClass(x: number, y: number): string {
-    let c = 'box';
-    if (this.isLetter(x, y)) c = 'letter-box';
-    return c;
+  get boardSize(): ICoordinates {
+    return vxm.activeGame.game.boardSize || { x: 0, y: 0 };
   }
 
-  isLetter(x: number, y: number): boolean {
+  getClass(coordinates: ICoordinates): string {
+    const selectedQuestions = vxm.activeGame.selectedQuestions;
+    if (!this.isLetter(coordinates)) return 'box';
+    else {
+      if (selectedQuestions.length == 0) return 'letter-box';
+      else {
+        const correspondingQuestions = vxm.activeGame.game.questions.filter(
+          (q: Question) => q.containsCoordinates(coordinates)
+        );
+        console.log(correspondingQuestions);
+        return 'letter-box';
+      }
+    }
+  }
+
+  isLetter(coordinates: ICoordinates): boolean {
+    const { x, y } = coordinates;
     return this.vxm.activeGame.gameBoard[y][x] != 'none';
   }
 
-  async onClick(x: number, y: number) {
+  async onClick(coordinates: ICoordinates) {
     await vxm.activeGame.selectCoordinates({
-      coordinates: { x, y },
+      coordinates,
     });
   }
 }
 </script>
 
 <template>
-  <div class="flex flex-col">
-    <div v-for="y of boardColumns" :key="y" class="flex flex-row m-1">
+  <div v-if="vxm.activeGame.isLoaded" class="flex flex-col">
+    <div v-for="y of boardSize.y" :key="y" class="flex flex-row m-1">
       <div
-        v-for="x of boardRows"
+        v-for="x of boardSize.x"
         :key="x"
-        :class="getClass(x, y)"
-        @click="onClick(x, y)"
+        :class="getClass({ x, y })"
+        @click="onClick({ x, y })"
       ></div>
     </div>
   </div>

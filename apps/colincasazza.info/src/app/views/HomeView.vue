@@ -9,10 +9,6 @@
       <a class="w-min link" href="https://github.com/colanzio5">
         github.com/colanzio5
       </a>
-      <br />
-      <a class="link w-min" href="https://www.linkedin.com/in/ccasazza/">
-        linkedin.com/in/ccasazza
-      </a>
     </div>
     <div class="app-title">about me</div>
     <div class="mb-4">

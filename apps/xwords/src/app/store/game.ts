@@ -1,9 +1,9 @@
 import { db } from '@app/services/firebase';
-import { Game, IGameDbo } from '@app/utils/game';
-import { IQuestion, IQuestionDirectionEnum } from '@app/utils/question';
-import { create2dArray, ICoordinates } from '@app/utils/utils';
-import { doc, getDoc } from 'firebase/firestore';
-import { action, createModule } from 'vuex-class-component';
+import { getGameDbo } from '@app/services/firebase/game';
+import { Game } from '@app/utils/game';
+import { IQuestion, QuestionDirection } from '@app/utils/question';
+import { ICoordinates } from '@app/utils/utils';
+import { action, createModule, mutation } from 'vuex-class-component';
 
 export class ActiveGameStore extends createModule({
   namespaced: 'activeGame',
@@ -11,15 +11,42 @@ export class ActiveGameStore extends createModule({
 }) {
   isLoaded = false;
   game!: Game;
-  boardSize: ICoordinates = { x: 0, y: 0 };
   gameBoard: Array<Array<string>> = [[]];
   acrossQuestions: IQuestion[] = [];
   downQuestions: IQuestion[] = [];
+  selectedQuestions: IQuestion[] = [];
+
+  @mutation unselect(): void {
+    this.selectedQuestions = [];
+  }
+
+  @mutation unload(): void {
+    this.gameBoard = [[]];
+    this.acrossQuestions = [];
+    this.downQuestions = [];
+    this.selectedQuestions = [];
+    this.isLoaded = false;
+  }
+
+  @action async load(props: {
+    activeGameId: string;
+    ownerId: string;
+  }): Promise<void> {
+    const activeGameDbo = await getGameDbo(db, props.activeGameId);
+    this.game = await Game.FromDbo(db, activeGameDbo);
+    this.acrossQuestions = this.game.questions.filter(
+      (q) => q.direction == QuestionDirection.ACROSS
+    );
+    this.downQuestions = this.game.questions.filter(
+      (q) => q.direction == QuestionDirection.DOWN
+    );
+    console.log(this.game);
+    this.isLoaded = true;
+  }
 
   @action async selectCoordinates(props: {
     coordinates: ICoordinates;
   }): Promise<void> {
-    console.log(props.coordinates);
     const selectedQuestions = this.game.questions.filter((q) => {
       console.log([...q.answerMap.keys()], props.coordinates);
       return [...q.answerMap.keys()].some(
@@ -27,45 +54,5 @@ export class ActiveGameStore extends createModule({
       );
     });
     console.log(selectedQuestions);
-  }
-
-  @action async setActiveLiveGame(props: {
-    activeGameId: string;
-    ownerId: string;
-  }): Promise<void> {
-    const liveGameSnap = await getDoc(doc(db, 'LiveGames', props.activeGameId));
-    if (!liveGameSnap.exists()) throw new Error('live game does not exist.');
-    const liveGameDbo = liveGameSnap.data() as IGameDbo;
-    this.game = await Game.FromFirebaseDoc(db, liveGameDbo);
-    // create game board
-    // compute board size first
-    // we could do this once in the game factory (in getGameInstance)
-    this.boardSize = this.game.questions
-      .flatMap((q) => [...q.answerMap])
-      .reduce(
-        (pre, cur) => {
-          const largest = pre;
-          if (cur[0].x > pre.x) largest.x = cur[0].x;
-          if (cur[0].y > pre.y) largest.y = cur[0].y;
-          return largest;
-        },
-        { x: 0, y: 0 }
-      );
-    this.boardSize.x += 1;
-    this.boardSize.y += 1;
-    this.gameBoard = create2dArray(this.boardSize.x, this.boardSize.y);
-    this.game.questions
-      .flatMap((q) => [...q.answerMap])
-      .forEach((q) => {
-        const { y, x } = q[0];
-        this.gameBoard[y][x] = q[1];
-      });
-    this.acrossQuestions = this.game.questions.filter(
-      (q) => q.direction == IQuestionDirectionEnum.ACROSS
-    );
-    this.downQuestions = this.game.questions.filter(
-      (q) => q.direction == IQuestionDirectionEnum.DOWN
-    );
-    this.isLoaded = true;
   }
 }

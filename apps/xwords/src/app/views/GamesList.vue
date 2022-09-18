@@ -40,16 +40,14 @@ export default class GamesList extends Vue {
       gameTemplateId,
       liveGameOwnerId: 'DefaultUser',
     });
-    await vxm.gamesList.unload();
     await this.$router.push({ name: 'game', params: { id: newActiveGame.id } });
   }
 
   async openInProgressGame(activeGameId: string) {
-    await vxm.activeGame.setActiveLiveGame({
-      ownerId: 'Default',
+    await vxm.activeGame.load({
+      ownerId: 'DefaultUser',
       activeGameId,
     });
-    await vxm.gamesList.unload();
     await this.$router.push({ name: 'game', params: { id: activeGameId } });
   }
 }

@@ -1,20 +1,20 @@
-import { doc, Firestore, getDoc } from 'firebase/firestore';
+import { getGameTemplateDbo } from '@app/services/firebase/gameTemplate';
+import { Firestore } from 'firebase/firestore';
 import { generateUUID } from 'three/src/math/MathUtils';
 import { GameFactory } from './gameFactory';
 import { IGameTemplateDbo } from './gameTemplate';
 import { Question } from './question';
-import type { ICoordinates } from './utils';
+import { ICoordinates } from './utils';
 
 export enum GameStatus {
   IN_PROGRESS,
   COMPLETED,
 }
-export type IBoardState = Record<string, unknown> | Map<ICoordinates, string>;
+export type IBoardState = Array<Array<string>>;
 export interface IGame {
   ownerId: string;
   gameTemplateId: string;
   status: GameStatus;
-  boardState: IBoardState; // todo: possibly change to array of game 'actions'
 }
 export interface IGameDbo extends IGame {
   id: string;
@@ -26,35 +26,19 @@ export class Game implements IGame {
   gameTemplateId = '';
   status: GameStatus = GameStatus.IN_PROGRESS;
   questions: Question[] = [];
-  boardState: IBoardState = new Map();
+  boardState: IBoardState = [[]];
+  boardSize: ICoordinates = { x: 0, y: 0 };
 
-  static async FromFirebaseDoc(
-    db: Firestore,
-    props: IGameDbo
-  ): Promise<Game> {
-    // populate live game's aquestions
-    // load corresponding game template
-    const gameTemplatesSnap = await getDoc(
-      doc(db, 'GameTemplates', props.gameTemplateId)
-    );
-    console.log(props.gameTemplateId);
-    if (!gameTemplatesSnap.exists())
-      throw new Error('live game template not found.');
-    // parse and questions in game template into live game
-    const gameTemplateDbo = gameTemplatesSnap.data() as IGameTemplateDbo;
-    console.log(gameTemplateDbo);
+  static async FromDbo(db: Firestore, props: IGameDbo): Promise<Game> {
+    const gameTemplateDbo = await getGameTemplateDbo(db, props.gameTemplateId);
     const gameFactory = new GameFactory();
-    gameTemplateDbo.questions.forEach((q) => {
-      gameFactory.addQuestion(q);
-    });
-    // write dbo fields to live game object
-    const liveGame = gameFactory.getGame();
-    liveGame.ownerId = props.ownerId;
-    liveGame.gameTemplateId = props.gameTemplateId;
-    liveGame.status = props.status;
-    liveGame.id = props.id;
-    liveGame.boardState = props.boardState;
-    return liveGame;
+    gameTemplateDbo.questions.forEach((q) => gameFactory.addQuestion(q));
+    const game = gameFactory.getGame();
+    game.id = props.id
+    game.gameTemplateId = props.gameTemplateId;
+    game.status = props.status;
+    console.log(game);
+    return game;
   }
 
   static ToDbo(game: Game): IGameDbo {
@@ -63,7 +47,6 @@ export class Game implements IGame {
       ownerId: game.ownerId,
       status: game.status,
       gameTemplateId: game.gameTemplateId,
-      boardState: {},
     };
   }
 
