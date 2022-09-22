@@ -15,16 +15,12 @@ import BackgroundWrapper from '@app/views/background/BackgroundWrapper.vue';
   },
 })
 export default class App extends Vue {
-  get isAppLoaded(): boolean {
-    return vxm.renderer.rendererRootViewPort.isMounted;
+  get vxm() {
+    return vxm;
   }
-
-  get isBackgroundLoaded(): boolean {
-    return vxm.background.isLoaded;
-  }
-
-  mounted(): void {
+  mounted() {
     vxm.renderer.start();
+    vxm.background.constructFlock();
   }
 }
 </script>
@@ -33,10 +29,10 @@ export default class App extends Vue {
   <div class="app-wrapper">
     <div class="w-full h-full relative">
       <RendererRootViewPortComponent class="z-10" />
-      <div v-if="isAppLoaded">
-        <BackgroundWrapper class="absolute w-full h-full" />
+      <div v-if="vxm.renderer.rendererRootViewPort.isMounted">
+        <BackgroundWrapper v-if="vxm.background.isMounted" class="absolute w-full h-full" />
         <div
-          v-if="isBackgroundLoaded"
+          v-if="vxm.background.isMounted"
           class="absolute w-full h-full flex flex-col z-30 p-4"
         >
           <NavBar />

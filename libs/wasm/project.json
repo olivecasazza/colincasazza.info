@@ -8,13 +8,13 @@
       "options": {
         "cwd": "libs/wasm",
         "commands": [
-          " wasm-pack build --debug -t web"
+          "wasm-pack build --debug -t web"
         ]
       },
       "configurations": {
         "production": {
           "commands": [
-            " wasm-pack build -t web"
+            "wasm-pack build -t web"
           ]
         }
       }

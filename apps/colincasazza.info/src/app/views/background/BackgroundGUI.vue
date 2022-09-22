@@ -1,25 +1,27 @@
 <template>
-  <div class="app-view-port h-full w-full">
+  <div v-if="vxm.background.isMounted" class="app-view-port h-full w-full">
     <div ref="gui-container"></div>
   </div>
 </template>
 
 <script lang="ts">
-import useEmitter from '@app/emitter';
+import { vxm } from '@app/store';
 import {
   generateRandomColor,
   randomFromRange,
   randomIntFromRange,
 } from '@app/utils/random';
-import { vxm } from '@app/store';
 import { GUI } from 'dat.gui';
 import { Vue } from 'vue-class-component';
-import { DEFAULT_BIRD_ID, generateBirdId } from './background';
 import type { IBirdConfig } from './background';
+import { DEFAULT_BIRD_ID, generateBirdId } from './background';
 
 export default class BackgroundGUI extends Vue {
   gui: GUI = new GUI({ autoPlace: false, closeOnTop: true });
-  emitter = useEmitter();
+
+  get vxm() {
+    return vxm;
+  }
 
   get container(): HTMLElement {
     return this.$refs['gui-container'] as HTMLElement;
@@ -34,10 +36,6 @@ export default class BackgroundGUI extends Vue {
   }
 
   async mounted() {
-    await vxm.background.$subscribeAction('initFlock', {
-      before: () => null,
-      after: () => null,
-    });
     this.container.appendChild(this.gui.domElement);
     this.gui.domElement.id = 'gui';
     this.gui.domElement.style.overflowY = 'scroll';
@@ -55,14 +53,20 @@ export default class BackgroundGUI extends Vue {
 
     this.gui.add({ export: () => this.exportBirdsConfigAsJSON() }, 'export');
     this.globalsFloder
-      .add(vxm.background, 'maxFlockSize')
+      .add({ max_flock_size: vxm.background.maxFlockSize }, 'max_flock_size')
       .min(1)
       .max(2000)
       .name('max flock size')
-      .onFinishChange(
-        (newMaxFlockSize: number) =>
-          (vxm.background.maxFlockSize = newMaxFlockSize)
+      .onChange(
+        async (newMax) => await vxm.background.updateMaxFlockSize(newMax)
       );
+
+    this.globalsFloder
+      .add(vxm.background, 'timeStep')
+      .min(0.0)
+      .max(3.0)
+      .name('time step');
+
     this.globalsFloder.open();
     await vxm.background.birdConfigs.forEach(this.addBirdConfigToGui);
   }
@@ -74,16 +78,16 @@ export default class BackgroundGUI extends Vue {
   }
 
   async generateRandomBirdConfig() {
-    const newBirdConfig = await vxm.background.addBirdConfig({
+    const newBirdConfig = await vxm.background.addOrUpdateBirdConfig({
       id: generateBirdId(),
       weight: randomIntFromRange(25, 75),
       neighborDistance: randomIntFromRange(0, 50),
       desiredSeparation: randomIntFromRange(50, 250),
-      separationMultiplier: randomFromRange(0.001, 1),
-      alignmentMultiplier: randomFromRange(0.001, 1),
-      cohesionMultiplier: randomFromRange(0.001, 1),
-      maxForce: randomFromRange(0.0001, 1),
-      maxSpeed: randomFromRange(0.001, 3),
+      separationMultiplier: randomFromRange(0.001, 1.2),
+      alignmentMultiplier: randomFromRange(0.001, 1.2),
+      cohesionMultiplier: randomFromRange(0.001, 1.2),
+      maxForce: randomFromRange(0.001, 0.5),
+      maxSpeed: randomFromRange(0.001, 10),
       birdColor: '#' + generateRandomColor().getHexString(),
       birdSize: randomFromRange(3, 15),
     } as IBirdConfig);
@@ -103,7 +107,7 @@ export default class BackgroundGUI extends Vue {
       .addColor(configToAdd, 'birdColor')
       .setValue(configToAdd.birdColor)
       .onFinishChange(async (updatedColor: any) => {
-        await vxm.background.updateBirdConfig({
+        await vxm.background.addOrUpdateBirdConfig({
           ...configToAdd,
           birdColor: updatedColor,
         });
@@ -123,7 +127,7 @@ export default class BackgroundGUI extends Vue {
       birdFolder
         .add(configToAdd, attr)
         .onFinishChange(async (updatedValue: any) => {
-          await vxm.background.updateBirdConfig({
+          await vxm.background.addOrUpdateBirdConfig({
             ...configToAdd,
             [attr]: updatedValue,
           });

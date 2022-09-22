@@ -6,10 +6,11 @@ import {
   type IBirdConfig,
 } from '@app/views/background/background';
 import { Color } from 'three';
-import { action, createModule } from 'vuex-class-component';
+import { action, createModule, mutation } from 'vuex-class-component';
 import { BirdConfig, Flock } from '@wasm';
 import init from '@wasm';
 import * as WeightedArray from 'weighted-array';
+import { vxm } from '.';
 
 const { select } = WeightedArray;
 
@@ -19,100 +20,85 @@ const VuexModule = createModule({
 });
 
 export class BackgroundStore extends VuexModule {
-  public birdConfigs: Map<string, IBirdConfig> = new Map<string, IBirdConfig>();
-  public isDragging = false;
-  public isLoaded = false;
-  public updating = false;
+  birdConfigs: Map<string, IBirdConfig> = new Map<string, IBirdConfig>();
+  isDragging = false;
+  isMounted = false;
+  updating = false;
+  timeStep = 1.0;
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public $subscribeAction: any;
-  private _maxFlockSize: number = MAX_FLOCK_SIZE;
+  $subscribeAction: any;
   private _flock?: Flock;
+  private _maxFlockSize = MAX_FLOCK_SIZE;
 
-  get maxFlockSize(): number {
-    return this._flock.get_current_flock_size();
+  get currentFlockSize() {
+    if (!this._flock) return 1;
+    return this._flock.current_flock_size;
   }
-  set maxFlockSize(_maxFlockSize: number) {
-    if (this._flock) this._flock.set_max_flock_size(_maxFlockSize);
-    this._maxFlockSize = _maxFlockSize;
+
+  get maxFlockSize() {
+    return vxm.background._maxFlockSize;
   }
-  get currentFlockSize(): number {
-    return this._flock?.get_current_flock_size() || 0;
+
+  @action async updateMaxFlockSize(newMaxFlockSize: number) {
+    this._flock.max_flock_size = Math.ceil(newMaxFlockSize);
+    this._maxFlockSize = newMaxFlockSize;
+  }
+
+  @action async constructFlock(): Promise<void> {
+    this._flock = new Flock(
+      // todo: determine number birds to add based on screen size and performance
+      // const n = (this.view.viewPort.width * this.view.viewPort.height) / 500;
+      this._maxFlockSize,
+      BigInt(new Date().getUTCMilliseconds())
+    );
+    await vxm.background.addOrUpdateBirdConfig({
+      id: generateBirdId(),
+      weight: 5,
+      neighborDistance: 200,
+      desiredSeparation: 50,
+      separationMultiplier: 1.7,
+      alignmentMultiplier: 0.3,
+      cohesionMultiplier: 0.01,
+      maxSpeed: 5,
+      maxForce: 0.1,
+      birdSize: 12,
+      birdColor: themeColors.highlight[200],
+    } as IBirdConfig);
+    await vxm.background.addOrUpdateBirdConfig({
+      id: DEFAULT_BIRD_ID,
+      weight: 80,
+      neighborDistance: 200,
+      desiredSeparation: 50,
+      separationMultiplier: 1.7,
+      alignmentMultiplier: 0.3,
+      cohesionMultiplier: -0.7,
+      maxSpeed: 2,
+      maxForce: 0.01,
+      birdSize: 6,
+      birdColor: themeColors.compliment[500],
+    } as IBirdConfig);
+    this.isMounted = true;
   }
 
   @action async unmounted() {
-    if (!this._flock) return;
     this.birdConfigs.forEach((birdConfig) => {
       if (birdConfig.wasmObject) birdConfig.wasmObject.free();
     });
     this._flock.free();
   }
 
-  @action async initFlock(): Promise<void> {
-    await init();
-    this._flock = Flock.new(
-      // todo: determine number birds to add based on screen size and performance
-      // const n = (this.view.viewPort.width * this.view.viewPort.height) / 500;
-      MAX_FLOCK_SIZE,
-      BigInt(new Date().getUTCMilliseconds())
-    );
-    // add configs for flock
-    await Promise.all(
-      [
-        {
-          id: generateBirdId(),
-          weight: 1,
-          neighborDistance: 200,
-          desiredSeparation: 50,
-          separationMultiplier: 1.7,
-          alignmentMultiplier: 0.3,
-          cohesionMultiplier: 0.01,
-          maxSpeed: 2,
-          maxForce: 0.01,
-          birdSize: 12,
-          birdColor: themeColors.highlight[200],
-        } as IBirdConfig,
-        {
-          id: DEFAULT_BIRD_ID,
-          weight: 80,
-          neighborDistance: 200,
-          desiredSeparation: 50,
-          separationMultiplier: 1.7,
-          alignmentMultiplier: 0.3,
-          cohesionMultiplier: 0.01,
-          maxSpeed: 2,
-          maxForce: 0.01,
-          birdSize: 6,
-          birdColor: themeColors.compliment[500],
-        } as IBirdConfig,
-      ].map(this.addBirdConfig)
-    );
-    this.isLoaded = true;
-  }
-
-  @action async addBirdConfig(configParams: IBirdConfig): Promise<IBirdConfig> {
+  @action async addOrUpdateBirdConfig(
+    configParams: IBirdConfig
+  ): Promise<IBirdConfig> {
     if (!this._flock)
       throw new Error(
         "[background.vuex] cannot add config, flock doesn't exist."
       );
     const birdConfig = await this.generateBirdConfig(configParams);
-    this._flock.add_bird_config(birdConfig.id, birdConfig.wasmObject);
     this.birdConfigs.set(birdConfig.id, birdConfig);
+    this._flock.insert_bird_config(birdConfig.id, birdConfig.wasmObject);
     return birdConfig;
-  }
-
-  @action async updateBirdConfig(
-    updatedBirdConfig: IBirdConfig
-  ): Promise<void> {
-    if (!this._flock)
-      throw new Error(
-        "[background.vuex] cannot update bird config, flock doesn't exist."
-      );
-    const newBirdConfig = await this.generateBirdConfig(updatedBirdConfig);
-    this._flock.update_bird_config(
-      updatedBirdConfig.id,
-      newBirdConfig.wasmObject
-    );
   }
 
   @action async removeBirdConfig(configIdToRemove: string) {
@@ -141,7 +127,7 @@ export class BackgroundStore extends VuexModule {
     this._flock.update(
       props.sceneWidth,
       props.sceneHeight,
-      props.timeStep,
+      props.timeStep ? props.timeStep : vxm.background.timeStep,
       props.updateFlockGeometryCallback
     );
   }

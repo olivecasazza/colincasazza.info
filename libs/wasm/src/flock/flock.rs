@@ -6,7 +6,7 @@ use std::collections::HashMap;
 
 use crate::utils::log;
 
-use super::{bird::Bird, bird_config::{BirdConfig}};
+use super::{bird::Bird, bird_config::BirdConfig};
 
 #[wasm_bindgen]
 pub struct Flock {
@@ -18,19 +18,7 @@ pub struct Flock {
 
 #[wasm_bindgen]
 impl Flock {
-    pub fn get_current_flock_size(&self) -> usize {
-        self.birds.clone().len()
-    }
-    pub fn add_bird_config(&mut self, config_id: String, bird_config: BirdConfig) {
-        self.configs.insert(config_id, bird_config);
-    }
-    pub fn update_bird_config(&mut self, config_id: String, updated_bird_config: BirdConfig) {
-        self.configs.insert(config_id, updated_bird_config);
-    }
-    pub fn remove_bird_config(&mut self, config_id: String) {
-        self.configs.remove(&config_id);
-    }
-
+    #[wasm_bindgen(constructor)]
     pub fn new(max_flock_size: usize, seed: u64) -> Flock {
         Flock {
             max_flock_size,
@@ -40,11 +28,17 @@ impl Flock {
         }
     }
 
-    pub fn set_max_flock_size(&mut self, max_flock_size: usize) {
+    #[wasm_bindgen(getter)]
+    pub fn max_flock_size(&self) -> usize {
+        self.max_flock_size
+    }
+
+    #[wasm_bindgen(setter)]
+    pub fn set_max_flock_size(&mut self, new_max_flock_size: usize) {
         // if too many birds, remove randomly untill in size
-        if max_flock_size < self.birds.len() {
+        if new_max_flock_size < self.birds.len() {
             let mut new_birds = self.birds.to_vec();
-            for _ in 0..new_birds.len() - max_flock_size {
+            for _ in 0..new_birds.len() - new_max_flock_size {
                 let idx = self.rng.rand_range(0..(new_birds.len()) as u32);
                 new_birds.remove(idx as usize);
             }
@@ -52,20 +46,12 @@ impl Flock {
                 ordered_float::OrderedFloat(bird.position[k])
             });
         }
-        self.max_flock_size = max_flock_size;
+        self.max_flock_size = new_max_flock_size;
     }
 
-    pub fn get_max_flock_size(&self) -> usize {
-        self.max_flock_size
-    }
-
-    pub fn add_bird_at_random_position(&mut self, config_id: String, width: f32, height: f32) {
-        // generate some random params for bird
-        let half_width = width / 2f32;
-        let half_height = height / 2f32;
-        let x = (self.rng.rand_float() * width) - half_width;
-        let y = (self.rng.rand_float() * height) - half_height;
-        self.add_bird(config_id, x, y);
+    #[wasm_bindgen(getter)]
+    pub fn current_flock_size(&self) -> usize {
+        self.birds.len()
     }
 
     pub fn add_bird(&mut self, config_id: String, pos_x: f32, pos_y: f32) {
@@ -89,7 +75,6 @@ impl Flock {
             acceleration,
             config_id,
         });
-
         let num_birds = self.birds.len();
         // if oversized remove one from front of the vector
         if num_birds > usize::from(self.max_flock_size) {
@@ -100,6 +85,23 @@ impl Flock {
         self.birds = kd_tree::KdTree2::build_by_key(new_birds, |bird, k| {
             ordered_float::OrderedFloat(bird.position[k])
         });
+    }
+
+    pub fn add_bird_at_random_position(&mut self, config_id: String, width: f32, height: f32) {
+        // generate some random params for bird
+        let half_width = width / 2f32;
+        let half_height = height / 2f32;
+        let x = (self.rng.rand_float() * width) - half_width;
+        let y = (self.rng.rand_float() * height) - half_height;
+        self.add_bird(config_id, x, y);
+    }
+
+    pub fn insert_bird_config(&mut self, config_id: String, bird_config: BirdConfig) {
+        self.configs.insert(config_id, bird_config);
+    }
+
+    pub fn remove_bird_config(&mut self, config_id: String) {
+        self.configs.remove(&config_id);
     }
 
     // we could also pass a js closure that updates vertex buffer
@@ -124,23 +126,24 @@ impl Flock {
             .clone()
             .to_vec()
             .iter_mut()
-            .filter_map(|bird| {
-                let bird_config = self.configs.get(&bird.config_id);
-                match bird_config {
-                    Some(bird_config) => {
-                        bird.update_bird(&self.birds, bird_config.clone(), &width, &height, &time_step);
-                        for vertex in bird.get_vertices(bird_config) {
-                            vertices.push(vertex.x);
-                            vertices.push(vertex.y);
-                            vertices.push(0.);
-                            colors.push(bird_config.color_r);
-                            colors.push(bird_config.color_g);
-                            colors.push(bird_config.color_b);
-                        }
-                        return Some(bird.to_owned())
-                    }
-                    None => return None
+            .map(|bird| {
+                let bird_config = self.configs.get(&bird.config_id).unwrap();
+                bird.update_bird(
+                    &self.birds,
+                    bird_config.clone(),
+                    &width,
+                    &height,
+                    &time_step,
+                );
+                for vertex in bird.get_vertices(bird_config) {
+                    vertices.push(vertex.x);
+                    vertices.push(vertex.y);
+                    vertices.push(0.);
+                    colors.push(bird_config.color_r);
+                    colors.push(bird_config.color_g);
+                    colors.push(bird_config.color_b);
                 }
+                bird.to_owned()
             })
             .collect();
 
