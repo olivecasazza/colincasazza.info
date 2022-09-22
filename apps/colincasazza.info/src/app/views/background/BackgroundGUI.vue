@@ -1,6 +1,6 @@
 <template>
   <div v-if="vxm.background.isMounted" class="app-view-port h-full w-full">
-    <div ref="gui-container"></div>
+    <div ref="gui-container" class="noselect"></div>
   </div>
 </template>
 
