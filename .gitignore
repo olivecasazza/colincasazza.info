@@ -2,7 +2,6 @@
 
 # compiled output
 /dist
-**/dist
 /tmp
 /out-tsc
 
@@ -40,3 +39,5 @@ testem.log
 Thumbs.db
 
 .runtimeconfig.json
+**/dist/*
+apps/colincasazza.info/dist/**
