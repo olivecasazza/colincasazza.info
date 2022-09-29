@@ -1,9 +1,9 @@
-import { addOrUpdateGameTemplateDbo } from '@app/services/firebase/gameTemplate';
+import { addOrUpdateGameTemplateDbo } from '@app/services/gameTemplate';
 import { Firestore } from 'firebase/firestore';
 import { generateUUID } from 'three/src/math/MathUtils';
-import { Game } from '@app/utils/game';
+import { Game } from '@app/utils/game/game';
 import { QuestionDirection, Question } from './question';
-import { create2dArray, ICoordinates } from './utils';
+import { create2dArray, ICoordinates } from '../utils';
 
 export class GameFactory {
   private _game: Game = new Game();
@@ -42,7 +42,7 @@ export class GameFactory {
       );
     this._game.boardSize.x += 1;
     this._game.boardSize.y += 1;
-    const gameBoard = create2dArray(
+    const boardState = create2dArray(
       this._game.boardSize.x,
       this._game.boardSize.y
     );
@@ -50,9 +50,10 @@ export class GameFactory {
       .flatMap((q) => [...q.answerMap])
       .map((q) => {
         const { y, x } = q[0];
-        gameBoard[y][x] = q[1];
+        boardState[y][x] = q[1];
         return q;
       });
+    this._game.boardState = boardState;
     return this._game;
   }
 

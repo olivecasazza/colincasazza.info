@@ -1,10 +1,10 @@
-import { getGameTemplateDbo } from '@app/services/firebase/gameTemplate';
+import { getGameTemplateDbo } from '@app/services/gameTemplate';
 import { Firestore } from 'firebase/firestore';
 import { generateUUID } from 'three/src/math/MathUtils';
 import { GameFactory } from './gameFactory';
 import { IGameTemplateDbo } from './gameTemplate';
 import { Question } from './question';
-import { ICoordinates } from './utils';
+import { ICoordinates } from '../utils';
 
 export enum GameStatus {
   IN_PROGRESS,
@@ -37,7 +37,6 @@ export class Game implements IGame {
     game.id = props.id
     game.gameTemplateId = props.gameTemplateId;
     game.status = props.status;
-    console.log(game);
     return game;
   }
 

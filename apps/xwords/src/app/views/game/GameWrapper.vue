@@ -1,7 +1,8 @@
 <script lang="ts">
 import { vxm } from '@app/store';
-import { QuestionDirection } from '@app/utils/question';
+import { QuestionDirection } from '@app/utils/game/question';
 import { Options, Vue } from 'vue-class-component';
+import { useRoute } from 'vue-router';
 import GameBoard from './GameBoard.vue';
 import QuestionsList from './QuestionsList.vue';
 @Options({
@@ -11,6 +12,8 @@ import QuestionsList from './QuestionsList.vue';
   },
 })
 export default class GameWrapper extends Vue {
+  route = useRoute()
+
   get vxm() {
     return vxm;
   }
@@ -19,10 +22,14 @@ export default class GameWrapper extends Vue {
     return this.$route.params.id as string;
   }
 
-  created(): void {
-    console.log(vxm.activeGame.game);
+  async mounted(): Promise<void> {
+    const activeGameId = this.route.params.id as string;
+    await vxm.activeGame.load({
+      activeGameId,
+      ownerId: "DefaultUser"
+    });
   }
-
+  
   async beforeUnmount(): Promise<void> {
     await vxm.activeGame.unload();
   }

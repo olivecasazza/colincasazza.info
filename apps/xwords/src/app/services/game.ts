@@ -1,4 +1,4 @@
-import { IGameDbo } from '@app/utils/game';
+import { IGameDbo } from '@app/utils/game/game';
 import { doc, Firestore, getDoc } from 'firebase/firestore';
 
 export async function getGameDbo(

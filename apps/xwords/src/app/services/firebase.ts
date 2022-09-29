@@ -4,14 +4,14 @@ import { getFirestore } from "@firebase/firestore";
 import { getStorage } from "@firebase/storage";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyDip6sCeLVodJ4np58hQFzRRG6T3Ppt_RQ",
-  authDomain: "nullspace.firebaseapp.com",
-  databaseURL: "https://nullspace.firebaseio.com",
-  projectId: "nullspace",
-  storageBucket: "nullspace.appspot.com",
-  messagingSenderId: "630187191701",
-  appId: "1:630187191701:web:452f8822764f849fee1a9c",
-  measurementId: "G-6M8T4LSY7N",
+  apiKey: "AIzaSyA6eTXmJg_VyAHY6LbYfe2El8Ui6LpneQE",
+  authDomain: "xwords-404.firebaseapp.com",
+  databaseURL: "https://xwords-404.firebaseio.com",
+  projectId: "xwords-404",
+  storageBucket: "xwords-404.appspot.com",
+  messagingSenderId: "199044458861",
+  appId: "1:199044458861:web:7933c1c4dc1c5158639264",
+  measurementId: "G-DWREF344Y1"
 };
 
 const app = initializeApp(firebaseConfig);

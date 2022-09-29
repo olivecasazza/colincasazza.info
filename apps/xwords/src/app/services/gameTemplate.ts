@@ -1,4 +1,4 @@
-import { IGameTemplateDbo } from '@app/utils/gameTemplate';
+import { IGameTemplateDbo } from '@app/utils/game/gameTemplate';
 import { doc, Firestore, setDoc } from 'firebase/firestore';
 import { getDoc } from 'firebase/firestore';
 

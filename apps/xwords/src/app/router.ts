@@ -1,8 +1,15 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import GamesList from '@app/views/GamesList.vue';
-import GameWrapper from '@app/views/GameWrapper.vue';
+
+import SignUp from '@app/views/SignUp.vue';
+import Login from '@app/views/Login.vue';
+import FourZeroFour from '@app/views/FourZeroFour.vue';
+
 import UserProfile from '@app/views/UserProfile.vue';
+import GamesList from '@app/views/game/GamesList.vue';
+import GameWrapper from '@app/views/game/GameWrapper.vue';
+
 import { vxm } from './store';
+import { auth } from './services/firebase';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -30,30 +37,53 @@ const router = createRouter({
   },
   routes: [
     {
-      path: '/user',
+      path: '/login',
+      name: 'login',
+      component: Login,
+    },
+    {
+      path: '/signup',
+      name: 'signup',
+      component: SignUp,
+    },
+    {
+      path: '/:displayName',
       name: 'user',
-      component: UserProfile,
-    },
-    {
-      path: '/games',
-      name: 'games',
-      component: GamesList,
-    },
-    {
-      path: '/game/:id',
-      name: 'game',
-      component: GameWrapper,
+      children: [
+        {
+          path: '/:displayName/games',
+          name: 'games',
+          component: GamesList,
+        },
+        {
+          path: '/:displayName/game/:gameId',
+          name: 'game',
+          component: GameWrapper,
+        },
+        {
+          path: '/:displayName/',
+          name: 'userProfile',
+          component: UserProfile,
+        },
+        {
+          // path: "*",
+          path: '/:displayName/:catchAll(.*)',
+          component: FourZeroFour,
+        },
+      ],
     },
     {
       // path: "*",
       path: '/:catchAll(.*)',
-      redirect: '/games',
+      redirect: '/login',
     },
   ],
 });
 
-router.beforeEach((to, _from) => {
-  if (to.name == 'game' && !vxm.activeGame.isLoaded) {
+router.beforeEach(async (to, from) => {
+  if (!auth.currentUser) await vxm.user.logOut();
+
+  if (to.name == 'game' && from.name == 'game' && !vxm.activeGame.isLoaded) {
     router.replace({ name: 'games' });
   }
 });

@@ -1,5 +1,5 @@
-import { IGameDbo } from '@app/utils/game';
-import { IGameTemplateDbo } from '@app/utils/gameTemplate';
+import { IGameDbo } from '@app/utils/game/game';
+import { IGameTemplateDbo } from '@app/utils/game/gameTemplate';
 import {
   collection,
   Firestore,

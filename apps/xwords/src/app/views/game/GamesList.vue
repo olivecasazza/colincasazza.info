@@ -1,13 +1,16 @@
 <script lang="ts">
 import { vxm } from '@app/store';
-import { GameStatus } from '@app/utils/game';
-import { IGameTemplateDbo } from '@app/utils/gameTemplate';
+import { GameStatus } from '@app/utils/game/game';
+import { IGameTemplateDbo } from '@app/utils/game/gameTemplate';
 import { Options, Vue } from 'vue-class-component';
+import { useRouter } from 'vue-router';
 
 @Options({
   components: {},
 })
 export default class GamesList extends Vue {
+  router = useRouter();
+
   get vxm() {
     return vxm;
   }
@@ -36,19 +39,15 @@ export default class GamesList extends Vue {
   }
 
   async beginUnstartedGame(gameTemplateId: string) {
-    const newActiveGame = await vxm.gamesList.beginUnstartedGame({
+    await vxm.gamesList.beginUnstartedGame({
       gameTemplateId,
       liveGameOwnerId: 'DefaultUser',
     });
-    await this.$router.push({ name: 'game', params: { id: newActiveGame.id } });
+    await this.router.push({ name: 'game', params: { gameId: liveGameId } });
   }
 
   async openInProgressGame(activeGameId: string) {
-    await vxm.activeGame.load({
-      ownerId: 'DefaultUser',
-      activeGameId,
-    });
-    await this.$router.push({ name: 'game', params: { id: activeGameId } });
+    await this.router.push({ name: 'game', params: { gameId: activeGameId } });
   }
 }
 </script>
