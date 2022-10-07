@@ -5,9 +5,9 @@ import {
   createSubModule,
   extractVuexModule,
 } from "vuex-class-component";
-import { UserStore } from "./user";
-import { ActiveGameStore } from "./game";
-import { GamesListStore } from "./gamesList";
+import { UserStore } from "./user.store";
+import { ActiveGameStore } from "./game.store";
+import { GamesListStore } from "./gamesList.store";
 
 const VuexModule = createModule({
   namespaced: "game",

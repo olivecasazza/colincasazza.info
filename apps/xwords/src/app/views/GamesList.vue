@@ -1,13 +1,8 @@
 <script lang="ts">
 import { vxm } from '@app/store';
-import { GameStatus } from '@app/utils/game/game';
-import { IGameTemplateDbo } from '@app/utils/game/gameTemplate';
-import { Options, Vue } from 'vue-class-component';
+import {  Vue } from 'vue-class-component';
 import { useRouter } from 'vue-router';
 
-@Options({
-  components: {},
-})
 export default class GamesList extends Vue {
   router = useRouter();
 
@@ -15,35 +10,15 @@ export default class GamesList extends Vue {
     return vxm;
   }
 
-  get availableGameTemplates(): IGameTemplateDbo[] {
-    const activeGameIds = vxm.gamesList.activeGames.map((ag) => ag.id);
-    return vxm.gamesList.gameTemplates.filter((gt) =>
-      activeGameIds.includes(gt.id)
-    );
-  }
-
-  get inProgressGames() {
-    return vxm.gamesList.activeGames.filter(
-      (g) => g.status == GameStatus.IN_PROGRESS
-    );
-  }
-
-  get completedGames() {
-    return vxm.gamesList.activeGames.filter(
-      (g) => g.status == GameStatus.COMPLETED
-    );
-  }
-
   async created() {
     await vxm.gamesList.load();
   }
 
   async beginUnstartedGame(gameTemplateId: string) {
-    await vxm.gamesList.beginUnstartedGame({
-      gameTemplateId,
-      liveGameOwnerId: 'DefaultUser',
+    const { id } = await vxm.gamesList.createGameFromTemplate({
+      gameTemplateId
     });
-    await this.router.push({ name: 'game', params: { gameId: liveGameId } });
+    await this.router.push({ name: 'game', params: { gameId: id } });
   }
 
   async openInProgressGame(activeGameId: string) {
@@ -54,11 +29,12 @@ export default class GamesList extends Vue {
 
 <template>
   <div v-if="vxm.gamesList.isLoaded" class="w-full h-full">
+    
     <!-- not started -->
-    <div v-if="availableGameTemplates.length">
+    <div v-if="vxm.gamesList.gameTemplates.length">
       <div class="underline text-white">start new game</div>
       <div
-        v-for="gameTemplate in availableGameTemplates"
+        v-for="gameTemplate in vxm.gamesList.gameTemplates"
         :key="gameTemplate.id"
         class="text-white border border-white hover:link w-full p-2"
         @click="beginUnstartedGame(gameTemplate.id)"
@@ -81,10 +57,10 @@ export default class GamesList extends Vue {
     </div>
 
     <!-- complete -->
-    <div v-if="completedGames.length">
+    <div v-if="vxm.gamesList.completedGames.length">
       <div class="underline text-white">completed games</div>
       <div
-        v-for="gameTemplate in completedGames"
+        v-for="gameTemplate in vxm.gamesList.activeGames"
         :key="gameTemplate.id"
         class="text-white border border-white hover:link w-full p-2"
       >

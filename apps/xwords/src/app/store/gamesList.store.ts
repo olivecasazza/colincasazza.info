@@ -1,10 +1,10 @@
-import { db } from '@app/services/firebase';
-import { loadActiveGames, loadGameTemplates } from '@app/services/gamesList';
+import { db, loadGamesByUserId, loadGameTemplates } from '@app/services/firebase';
 import { GameStatus, IGameDbo } from '@app/utils/game/game';
 import { IGameTemplateDbo } from '@app/utils/game/gameTemplate';
 import { doc, setDoc } from 'firebase/firestore';
 import { generateUUID } from 'three/src/math/MathUtils';
 import { action, createModule } from 'vuex-class-component';
+import { vxm } from '.';
 
 export class GamesListStore extends createModule({
   namespaced: 'gamesList',
@@ -12,14 +12,19 @@ export class GamesListStore extends createModule({
 }) {
   gameTemplates: IGameTemplateDbo[] = [];
   activeGames: IGameDbo[] = [];
+  completedGames: IGameDbo[] = [];
   isLoaded = false;
 
   @action async load(): Promise<void> {
-    const activeGames = await loadActiveGames(db);
-    const activeGameIds = activeGames.map((ag) => ag.id);
+    const activeUser = await vxm.user.getActiveUser();
+    const allGames = await loadGamesByUserId(db, activeUser.uid);
+    const activeGames = allGames.filter(
+      (game) => game.status == GameStatus.IN_PROGRESS
+    );
+    const activeGameTemplateIds = activeGames.map((ag) => ag.gameTemplateId);
     const gameTemplates = await loadGameTemplates(db);
-    this.gameTemplates = gameTemplates.filter((t) =>
-      activeGameIds.includes(t.id)
+    this.gameTemplates = gameTemplates.filter(
+      (t) => !activeGameTemplateIds.includes(t.id)
     );
     this.activeGames = activeGames;
     this.isLoaded = true;
@@ -31,18 +36,20 @@ export class GamesListStore extends createModule({
     this.isLoaded = true;
   }
 
-  @action async beginUnstartedGame(props: {
-    liveGameOwnerId: string;
+  @action async createGameFromTemplate(props: {
     gameTemplateId: string;
-  }): Promise<void> {
+  }): Promise<IGameDbo> {
+    const { uid } = await vxm.user.getActiveUser();
     const activeGameDbo = {
-      ownerId: props.liveGameOwnerId,
+      ownerId: uid,
       gameTemplateId: props.gameTemplateId,
       id: generateUUID(),
       status: GameStatus.IN_PROGRESS,
       boardState: {},
+      actions: [],
     };
-    const liveGameId = activeGameDbo.id;
-    await setDoc(doc(db, 'LiveGames', liveGameId), activeGameDbo);
+    const gameId = activeGameDbo.id;
+    await setDoc(doc(db, 'LiveGames', gameId), activeGameDbo);
+    return activeGameDbo;
   }
 }

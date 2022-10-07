@@ -24,7 +24,7 @@ export default class QuestionsList extends Vue {
 </script>
 
 <template>
-  <div class="border border-white p-1">
+  <div class="app-view-port">
     <div class="text-white text-lg">
       {{ direction }}
     </div>
@@ -39,20 +39,19 @@ export default class QuestionsList extends Vue {
         v-if="isQuestionSelected(question)"
         class="flex flex-row question hover:link"
       >
-        <div class="w-5 border border-white">
+        <div class="max-w-min p-1 border border-primary-500">
           {{ question.number }}
         </div>
-        <div class="flex-grow border border-white">
+        <div class="flex-grow">
           <div class="flex-col w-full">
             <div>{{ question.question }}</div>
             <div class="flex-row">
               <input
                 v-for="qi of question.answerMap.size"
                 :key="qi"
-                :autofocus="qi === 0 ? 'true' : 'false'"
                 maxlength="1"
                 name=""
-                class="text-black w-20 h-20 border border-r-0 border-black"
+                class="text-black w-6 h-6 border border-r-0 border-black"
               />
             </div>
           </div>
@@ -61,10 +60,10 @@ export default class QuestionsList extends Vue {
 
       <!-- unselected question -->
       <div v-else class="flex flex-row question hover:link">
-        <div class="w-5 border border-white">
+        <div class="max-w-min p-1 border border-primary-500">
           {{ question.number }}
         </div>
-        <div class="flex-grow border border-white">
+        <div class="flex-grow">
           {{ question.question }}
         </div>
       </div>

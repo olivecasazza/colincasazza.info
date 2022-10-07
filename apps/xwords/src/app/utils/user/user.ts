@@ -1,44 +1,69 @@
-import { db } from '@app/services/firebase';
-import { loadActiveGames } from '@app/services/gamesList';
-import { Game, IGame, IGameDbo } from '../game/game';
+import {
+  db,
+  loadGamesByUserId,
+  loadUserDboFromId,
+} from '@app/services/firebase';
+import type { UserMetadata } from 'firebase/auth';
+import { IGameDbo } from '../game/game';
 
-interface AbstractUser {
-  id: string;
+interface BaseUser {
+  uid: string;
   email: string;
   displayName: string;
-  friendIds: string;
+  firstName?: string;
+  lastName?: string;
+  emailVerified: boolean;
+  metadata: UserMetadata;
 }
 
-export interface IUser extends AbstractUser {
-  games: IGame[];
+export interface IUser extends BaseUser {
+  friends: IUserDbo[];
+  games: IGameDbo[];
 }
 
-export interface IUserDbo extends AbstractUser {
+export interface IUserDbo extends BaseUser {
+  friends: string[];
   games: string[];
 }
 
 export class User implements IUser {
-  id: string;
-  email: string;
-  displayName: string;
-  friendIds: string;
-  games: IGame[];
+  uid = '';
+  email = '';
+  displayName = '';
+  firstName?: string | undefined;
+  lastName?: string | undefined;
+  emailVerified = false;
+  metadata: UserMetadata = {};
+  friends: IUserDbo[] = [];
+  games: IGameDbo[] = [];
 
   constructor(props: IUser) {
-    this.id = props.id;
+    this.uid = props.uid;
     this.email = props.email;
     this.displayName = props.displayName;
-    this.friendIds = props.friendIds;
+    this.friends = props.friends;
     this.games = props.games;
   }
 
   static async FromDbo(props: IUserDbo) {
-    const games: IGameDbo[] = await loadActiveGames(db);
+    const gamesDbos: IGameDbo[] = await loadGamesByUserId(db, props.uid);
+    const friends: IUserDbo[] = await Promise.all(
+      props.friends.map((uid) => loadUserDboFromId({ uid }))
+    );
     const user = new User({
       ...props,
-      games: await Promise.all(games.map((g) => Game.FromDbo(db, g))),
+      friends,
+      games: gamesDbos,
     });
     Object.assign(user, props);
     return user;
+  }
+
+  static ToDbo(user: User): IUserDbo {
+    return {
+      ...user,
+      games: user.games.map((g) => g.id),
+      friends: user.friends.map((f) => f.uid),
+    };
   }
 }

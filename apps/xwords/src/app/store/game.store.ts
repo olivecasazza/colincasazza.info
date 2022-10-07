@@ -1,7 +1,7 @@
-import { db } from '@app/services/firebase';
-import { getGameDbo } from '@app/services/game';
+
+import { db, getGameDbo } from '@app/services/firebase';
 import { Game } from '@app/utils/game/game';
-import { IQuestion, Question, QuestionDirection } from '@app/utils/game/question';
+import { Question, QuestionDirection } from '@app/utils/game/question';
 import { ICoordinates } from '@app/utils/utils';
 import { action, createModule, mutation } from 'vuex-class-component';
 
@@ -38,10 +38,9 @@ export class ActiveGameStore extends createModule({
   }
 
   @action async load(props: {
-    activeGameId: string;
-    ownerId: string;
+    gameId: string;
   }): Promise<void> {
-    const activeGameDbo = await getGameDbo(db, props.activeGameId);
+    const activeGameDbo = await getGameDbo(db, props.gameId);
     this._game = await Game.FromDbo(db, activeGameDbo);
     this.boardState = this._game.boardState;
     this.acrossQuestions = this._game.questions.filter(

@@ -1,15 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
 
-import SignUp from '@app/views/SignUp.vue';
-import Login from '@app/views/Login.vue';
 import FourZeroFour from '@app/views/FourZeroFour.vue';
+import Login from '@app/views/Login.vue';
+import SignUp from '@app/views/SignUp.vue';
 
+import GamesList from '@app/views/GamesList.vue';
 import UserProfile from '@app/views/UserProfile.vue';
-import GamesList from '@app/views/game/GamesList.vue';
-import GameWrapper from '@app/views/game/GameWrapper.vue';
 
-import { vxm } from './store';
-import { auth } from './services/firebase';
+import GameWrapper from '@app/views/game/GameWrapper.vue';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -47,30 +45,28 @@ const router = createRouter({
       component: SignUp,
     },
     {
-      path: '/:displayName',
-      name: 'user',
-      children: [
-        {
-          path: '/:displayName/games',
-          name: 'games',
-          component: GamesList,
-        },
-        {
-          path: '/:displayName/game/:gameId',
-          name: 'game',
-          component: GameWrapper,
-        },
-        {
-          path: '/:displayName/',
-          name: 'userProfile',
-          component: UserProfile,
-        },
-        {
-          // path: "*",
-          path: '/:displayName/:catchAll(.*)',
-          component: FourZeroFour,
-        },
-      ],
+      path: '/:displayName/games',
+      name: 'games',
+      meta: { requiresAuth: true },
+      component: GamesList,
+    },
+    {
+      path: '/:displayName/game/:gameId',
+      name: 'game',
+      component: GameWrapper,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/:displayName/',
+      name: 'userProfile',
+      component: UserProfile,
+      meta: { requiresAuth: true },
+    },
+    {
+      // path: "*",
+      path: '/:displayName/:catchAll(.*)',
+      component: FourZeroFour,
+      meta: { requiresAuth: true },
     },
     {
       // path: "*",
@@ -80,11 +76,18 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach(async (to, from) => {
-  if (!auth.currentUser) await vxm.user.logOut();
-
-  if (to.name == 'game' && from.name == 'game' && !vxm.activeGame.isLoaded) {
-    router.replace({ name: 'games' });
+router.beforeEach((to, from, next) => {
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    if (localStorage.getItem('jwt') == null) {
+      next({
+        path: '/login',
+        params: { nextUrl: to.fullPath },
+      });
+    } else {
+      next();
+    }
+  } else {
+    next();
   }
 });
 

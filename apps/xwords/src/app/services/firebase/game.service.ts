@@ -5,7 +5,8 @@ export async function getGameDbo(
   db: Firestore,
   gameId: string
 ): Promise<IGameDbo> {
-  const liveGameSnap = await getDoc(doc(db, 'LiveGames', gameId));
+  const gameRef = doc(db, 'LiveGames', gameId);
+  const liveGameSnap = await getDoc(gameRef);
   if (!liveGameSnap.exists()) throw new Error('live game does not exist.');
   return liveGameSnap.data() as IGameDbo;
 }

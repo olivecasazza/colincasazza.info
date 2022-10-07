@@ -1,9 +1,9 @@
-import { addOrUpdateGameTemplateDbo } from '@app/services/gameTemplate';
+import { addOrUpdateGameTemplateDbo } from '@app/services/firebase';
+import { Game } from '@app/utils/game/game';
 import { Firestore } from 'firebase/firestore';
 import { generateUUID } from 'three/src/math/MathUtils';
-import { Game } from '@app/utils/game/game';
-import { QuestionDirection, Question } from './question';
 import { create2dArray, ICoordinates } from '../utils';
+import { Question, QuestionDirection } from './question';
 
 export class GameFactory {
   private _game: Game = new Game();

@@ -1,96 +1,131 @@
 <script lang="ts">
 import { vxm } from '@app/store';
+import useVuelidate, { ErrorObject, Validation } from '@vuelidate/core';
+import { email, helpers, minLength, required } from '@vuelidate/validators';
+import { ValidationError } from 'schema-utils';
 import { Options, Vue } from 'vue-class-component';
 import { useRouter } from 'vue-router';
-import { required, email, minLength } from '@vuelidate/validators';
-import useVuelidate from '@vuelidate/core';
+
+interface ValidationState {
+  $dirty: false; // validations will only run when $dirty is true
+  $touch: () => void; // call to turn the $dirty state to true
+  $reset: () => void; // call to turn the $dirty state to false
+  $errors: {
+    $message: string;
+    $params: unknown;
+    $pending: boolean;
+    $invalid: boolean;
+  }[]; // contains all the current errors { $message, $params, $pending, $invalid }
+  $error: false; // true if validations have not passed
+  $invalid: false; // as above for compatibility reasons
+  // there are some other properties here, read the docs for more info
+}
 
 @Options({
-  components: {},
   validations: {
     form: {
       email: {
-        required,
-        email,
+        required: helpers.withMessage('email is required', required),
+        email: helpers.withMessage('invalid email address', email),
       },
       password: {
-        required,
-        min: minLength(6),
+        required: helpers.withMessage('password is required', required),
+        min: helpers.withMessage(
+          'password must be > 8 characters',
+          minLength(8)
+        ),
       },
     },
   },
 })
 export default class Login extends Vue {
+  router = useRouter();
+  isLoading = false;
   form = {
     email: '',
     password: '',
+    apiFailing: false,
   };
+  v$: Validation = useVuelidate() as unknown as Validation;
 
-  router = useRouter();
-  v$ = useVuelidate();
+  get firstError() {
+    const errors = (this.v$ as unknown as ValidationState).$errors;
+    if (errors.length > 0)
+      return (errors[0]['$message'] as string).toLowerCase();
+    return '';
+  }
 
-  async login() {
-    const { displayName } = await vxm.user.logIn({
-      email: this.form.email,
-      password: this.form.password,
-    });
-    await this.router.push({
-      name: 'user',
-      params: { displayName: displayName },
-    });
+  async logIn() {
+    this.isLoading = true;
+    this.form.apiFailing = false;
+    try {
+      const { displayName } = await vxm.user.logIn({
+        email: this.form.email,
+        password: this.form.password,
+      });
+      await this.router.push({
+        name: 'user',
+        params: { displayName },
+      });
+    } catch (error) {
+      const customValidationError: ErrorObject = {
+        $message:
+          'Error encountered while logging in with email and password. please check credentials and try again.',
+        $propertyPath: '',
+        $property: '',
+        $validator: '',
+        $params: {},
+        $pending: false,
+        $response: undefined,
+        $uid: '',
+      };
+      this.v$.$errors.push(customValidationError);
+    }
+    this.isLoading = false;
+  }
+
+  async goToSignUp() {
+    await this.router.push('signup');
   }
 }
 </script>
 
 <template>
-  <form class="app-view-port w-fit h-fit" @submit.prevent="onSubmit">
+  <form class="app-view-port w-fit h-fit text-white" @submit.prevent="onSubmit">
+    <div class="app-view-port">login</div>
     <!-- Email -->
-    <div class="app-view-port" :class="{ error: v$.form.email.$errors.length }">
-      <label class="form-label app-view-port" for="">Email</label>
-      <input
-        class="form-input"
-        placeholder="Enter your username"
-        type="email"
-        v-model="v$.form.email.$model"
-      />
-      <div class="pre-icon os-icon os-icon-user-male-circle"></div>
-      <!-- error message -->
-      <div
-        class="input-errors app-view-port"
-        v-for="(error, index) of v$.form.email.$errors"
-        :key="index"
-      >
-        <div class="error-msg">{{ error.$message.toLowerCase() }}</div>
-      </div>
+    <div class="app-view-port">
+      <label class="form-label" for="">email</label>
+      <input v-model="v$.form.email.$model" class="form-input" type="email" />
     </div>
-
     <!-- password -->
-    <div
-      class="app-view-port"
-      :class="{ error: v$.form.password.$errors.length }"
-    >
-      <label class="form-label m-1" for="">Password</label>
+    <div class="app-view-port">
+      <label class="form-label" for="">password</label>
       <input
-        class="form-input"
-        placeholder="Enter your password"
-        type="password"
         v-model="v$.form.password.$model"
+        class="form-input"
+        type="password"
       />
-      <div class="pre-icon os-icon os-icon-fingerprint"></div>
-      <!-- error message -->
-      <div
-        class="input-errors"
-        v-for="(error, index) of v$.form.password.$errors"
-        :key="index"
-      >
-        <div class="error-msg">{{ error.$message.toLowerCase() }}</div>
+    </div>
+    <!-- errors -->
+    <div v-if="firstError" class="input-errors app-view-port">
+      <div class="error-msg">
+        {{ firstError }}
       </div>
     </div>
-
-    <!-- Submit Button -->
-    <button class="app-view-port text-white hover:link" :disabled="v$.form.$invalid">
-      Login
+    <button
+      class="app-view-port text-white hover:link"
+      :disabled="v$.form.$invalid"
+      @click="logIn()"
+    >
+      login
     </button>
+    <button class="app-view-port text-white hover:link" @click="goToSignUp()">
+      sign up
+    </button>
+    <div v-if="isLoading" class="app-view-port">
+      <div class="loading-bar"></div>
+    </div>
   </form>
 </template>
 
@@ -99,51 +134,9 @@ export default class Login extends Vue {
   @apply text-secondary-400;
 }
 .form-label {
-  @apply text-white p-1;
+  @apply text-white p-0;
 }
 .form-input {
-  @apply text-black;
+  @apply text-black w-full;
 }
 </style>
-
-<!-- <template>
-  <div class="w-screen h-screen app-view-port text-white">
-    <div class="w-1/3 h-1/3">
-      <div class="p-2 text-lg text-highlight-400">login</div>
-      <div class="flex flex-row app-view-port p-1">
-        <div class="app-view-port w-24">email</div>
-        <input
-          v-model="email"
-          required
-          type="email"
-          placeholder="email"
-          class="border-r-0 text-black"
-        />
-      </div>
-      <div class="flex flex-row app-view-port p-1">
-        <div class="app-view-port w-24">password</div>
-        <input
-          v-model="password"
-          required
-          type="password"
-          placeholder="password"
-          class="border-r-0 text-black"
-        />
-      </div>
-      <div class="flex flex-row app-view-port p-1">
-        <button
-          class="app-view-port w-24 hover:link text-primary-400 text-left"
-          @click="login()"
-        >
-          login
-        </button>
-        <button
-          class="app-view-port w-24 hover:link text-secondary-400 text-left"
-          @click="login()"
-        >
-          sign up
-        </button>
-      </div>
-    </div>
-  </div>
-</template> -->

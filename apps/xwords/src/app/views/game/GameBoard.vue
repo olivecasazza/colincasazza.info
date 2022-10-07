@@ -19,7 +19,7 @@ export default class GameBoard extends Vue {
 
   isLetter(coordinates: ICoordinates): boolean {
     const { x, y } = coordinates;
-    return this.vxm.activeGame.boardState[y][x] != 'none';
+    return this.vxm.activeGame.boardState[y][x] !== null;
   }
 
   async onClick(coordinates: ICoordinates) {
@@ -35,7 +35,7 @@ export default class GameBoard extends Vue {
       if (selectedQuestions.length == 0) return 'box letter';
       else {
         if (selectedQuestions.some((q) => q.containsCoordinates(coordinates)))
-          return 'box selected-letter';
+          return 'box letter selected-letter';
         return 'box letter';
       }
     }
@@ -45,14 +45,16 @@ export default class GameBoard extends Vue {
 
 <template>
   <div v-if="vxm.activeGame.isLoaded" class="flex flex-col">
-    <div v-for="(y, yi) of boardSize.y" :key="yi" class="flex flex-row m-1">
-      <div
-        v-for="(x, xi) of boardSize.x"
-        :key="xi"
-        :class="getClass({ x: xi, y: yi })"
-        @click="onClick({ x: xi, y: yi })"
-      >
-        {{ vxm.activeGame.boardState[yi][xi] }}
+    <div v-for="(y, yi) of boardSize.y" :key="yi" class="flex flex-row">
+      <div v-for="(x, xi) of boardSize.x" :key="xi">
+        <div
+          :class="getClass({ x: xi, y: yi })"
+          @click="onClick({ x: xi, y: yi })"
+        >
+          <div v-if="isLetter({ x: xi, y: yi })">
+            {{ vxm.activeGame.boardState[yi][xi] }}
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -60,7 +62,7 @@ export default class GameBoard extends Vue {
 
 <style>
 .box {
-  @apply pl-1 pr-1 w-20 h-20 border;
+  @apply w-6 h-6 border text-center;
 }
 
 .empty {
@@ -68,14 +70,14 @@ export default class GameBoard extends Vue {
 }
 
 .letter {
-  @apply bg-white border-black hover:border-red-500;
+  @apply bg-white border-black hover:border-secondary-500;
 }
 
 .letter::hover {
-  @apply border border-red-400;
+  @apply border border-secondary-500;
 }
 
 .selected-letter {
-  @apply bg-red-400;
+  @apply bg-secondary-500;
 }
 </style>
