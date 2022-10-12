@@ -7,6 +7,6 @@ import router from './router';
 
 import '../../../../libs/theme/src/css/tailwind.scss';
 import '../../../../libs/theme/src/css/globals.scss';
-import init from '../../../../libs/wasm/pkg/wasm';
+import init from '../../../../libs/flock/pkg';
 
 init().then(() => createApp(App).use(router).use(i18n).mount('#app'));

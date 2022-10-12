@@ -36,5 +36,6 @@
         "linter": "eslint"
       }
     }
-  }
+  },
+  "plugins": ["@nxrs/cargo"]
 }

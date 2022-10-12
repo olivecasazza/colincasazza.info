@@ -11,8 +11,8 @@
       "@assets/*": ["./src/assets/*"],
       "@app/*": ["./src/app/*"],
       "@public/*": ["./src/public/*"],
-      "@theme/*": ["../../libs/theme"],
-      "@wasm/*": ["../../libs/wasm/pkg"]
+      "@libs/theme/*": ["../../libs/theme"],
+      "@libs/flock/*": ["../../libs/flock/pkg"]
     }
   },
   "references": [

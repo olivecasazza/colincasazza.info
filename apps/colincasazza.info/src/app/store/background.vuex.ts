@@ -1,14 +1,13 @@
-import themeColors from '@theme/src/lib/colors.cjs';
 import {
   DEFAULT_BIRD_ID,
   generateBirdId,
   MAX_FLOCK_SIZE,
-  type IBirdConfig,
+  type IBirdConfig
 } from '@app/views/background/background';
+import { BirdConfig, Flock } from '@libs/flock';
+import themeColors from '@libs/theme/src/lib/colors.cjs';
 import { Color } from 'three';
-import { action, createModule, mutation } from 'vuex-class-component';
-import { BirdConfig, Flock } from '@wasm';
-import init from '@wasm';
+import { action, createModule } from 'vuex-class-component';
 import * as WeightedArray from 'weighted-array';
 import { vxm } from '.';
 

@@ -1,7 +1,7 @@
 import { truncate } from '@app/utils/numbers';
 import type { ColorRepresentation } from 'three';
 import { generateUUID } from 'three/src/math/MathUtils';
-import type { BirdConfig } from '@wasm/pkg';
+import type { BirdConfig } from '@libs/flock';
 
 export interface IBirdConfig {
   id: string;

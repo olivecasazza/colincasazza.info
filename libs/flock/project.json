@@ -1,12 +1,12 @@
 {
   "$schema": "../../node_modules/nx/schemas/project-schema.json",
-  "sourceRoot": "libs/wasm/src",
   "projectType": "library",
+  "sourceRoot": "libs/flock/src",
   "targets": {
     "build": {
       "executor": "@nrwl/workspace:run-commands",
       "options": {
-        "cwd": "libs/wasm",
+        "cwd": "libs/flock",
         "commands": [
           "wasm-pack build --debug -t web"
         ]
@@ -20,12 +20,15 @@
       }
     },
     "test": {
-      "executor": "@nrwl/workspace:run-commands",
+      "executor": "@nxrs/cargo:test",
+      "options": {}
+    },
+    "lint": {
+      "executor": "@nxrs/cargo:clippy",
       "options": {
-        "cwd": "libs/wasm",
-        "commands": [
-          "wasm-pack test --chrome"
-        ]
+        "fix": false,
+        "failOnWarnings": true,
+        "noDeps": true
       }
     }
   },

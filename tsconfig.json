@@ -15,6 +15,7 @@
     "skipDefaultLibCheck": true,
     "baseUrl": ".",
     "paths": {
+      "@libs/*": ["libs/*"],
       "@theme": ["libs/theme/src/index.ts"],
       "@wasm": ["libs/wasm/src/index.ts"]
     }
