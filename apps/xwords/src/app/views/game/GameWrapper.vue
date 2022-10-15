@@ -1,7 +1,7 @@
 <script lang="ts">
 import { vxm } from '@app/store';
-import { QuestionDirection } from '@app/utils/question';
 import { Options, Vue } from 'vue-class-component';
+import { useRoute } from 'vue-router';
 import GameBoard from './GameBoard.vue';
 import QuestionsList from './QuestionsList.vue';
 @Options({
@@ -11,6 +11,8 @@ import QuestionsList from './QuestionsList.vue';
   },
 })
 export default class GameWrapper extends Vue {
+  route = useRoute();
+
   get vxm() {
     return vxm;
   }
@@ -19,8 +21,10 @@ export default class GameWrapper extends Vue {
     return this.$route.params.id as string;
   }
 
-  created(): void {
-    console.log(vxm.activeGame.game);
+  async mounted(): Promise<void> {
+    await vxm.activeGame.load({
+      gameId: this.route.params.gameId.toString()
+    });
   }
 
   async beforeUnmount(): Promise<void> {
@@ -32,7 +36,13 @@ export default class GameWrapper extends Vue {
 <template>
   <div v-if="vxm.activeGame.isLoaded" class="w-full h-full">
     <GameBoard />
-    <QuestionsList :questions="vxm.activeGame.downQuestions" :direction="'ACROSS'" />
-    <QuestionsList :questions="vxm.activeGame.acrossQuestions" :direction="'DOWN'" />
+    <QuestionsList
+      :questions="vxm.activeGame.downQuestions"
+      :direction="'ACROSS'"
+    />
+    <QuestionsList
+      :questions="vxm.activeGame.acrossQuestions"
+      :direction="'DOWN'"
+    />
   </div>
 </template>

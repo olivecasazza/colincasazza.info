@@ -1,8 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router';
+
+import FourZeroFour from '@app/views/FourZeroFour.vue';
+import Login from '@app/views/Login.vue';
+import SignUp from '@app/views/SignUp.vue';
+
 import GamesList from '@app/views/GamesList.vue';
-import GameWrapper from '@app/views/GameWrapper.vue';
 import UserProfile from '@app/views/UserProfile.vue';
-import { vxm } from './store';
+
+import GameWrapper from '@app/views/game/GameWrapper.vue';
 
 declare module 'vue-router' {
   interface RouteMeta {
@@ -30,31 +35,59 @@ const router = createRouter({
   },
   routes: [
     {
-      path: '/user',
-      name: 'user',
-      component: UserProfile,
+      path: '/login',
+      name: 'login',
+      component: Login,
     },
     {
-      path: '/games',
+      path: '/signup',
+      name: 'signup',
+      component: SignUp,
+    },
+    {
+      path: '/:displayName/games',
       name: 'games',
+      meta: { requiresAuth: true },
       component: GamesList,
     },
     {
-      path: '/game/:id',
+      path: '/:displayName/game/:gameId',
       name: 'game',
       component: GameWrapper,
+      meta: { requiresAuth: true },
+    },
+    {
+      path: '/:displayName/',
+      name: 'userProfile',
+      component: UserProfile,
+      meta: { requiresAuth: true },
+    },
+    {
+      // path: "*",
+      path: '/:displayName/:catchAll(.*)',
+      component: FourZeroFour,
+      meta: { requiresAuth: true },
     },
     {
       // path: "*",
       path: '/:catchAll(.*)',
-      redirect: '/games',
+      redirect: '/login',
     },
   ],
 });
 
-router.beforeEach((to, _from) => {
-  if (to.name == 'game' && !vxm.activeGame.isLoaded) {
-    router.replace({ name: 'games' });
+router.beforeEach((to, from, next) => {
+  if (to.matched.some((record) => record.meta.requiresAuth)) {
+    if (localStorage.getItem('jwt') == null) {
+      next({
+        path: '/login',
+        params: { nextUrl: to.fullPath },
+      });
+    } else {
+      next();
+    }
+  } else {
+    next();
   }
 });
 

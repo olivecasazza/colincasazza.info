@@ -1,5 +1,5 @@
 import { generateUUID } from 'three/src/math/MathUtils';
-import type { ICoordinates } from './utils';
+import type { ICoordinates } from '../utils';
 
 export enum QuestionDirection {
   ACROSS = 'ACROSS',
@@ -53,7 +53,7 @@ export class Question implements IQuestion {
   }
 
   containsCoordinates(coordinates: ICoordinates): boolean {
-    return [...this.answerMap.keys()].some((c) => c === coordinates);
+    return [...this.answerMap.keys()].some((c) => c.x === coordinates.x && c.y === coordinates.y );
   }
 
   static ToDbo(question: Question): IQuestionDbo {

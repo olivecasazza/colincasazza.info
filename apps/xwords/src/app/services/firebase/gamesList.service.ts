@@ -1,5 +1,6 @@
-import { IGameDbo } from '@app/utils/game';
-import { IGameTemplateDbo } from '@app/utils/gameTemplate';
+import { IGameDbo } from '@app/utils/game/game';
+import { IGameTemplateDbo } from '@app/utils/game/gameTemplate';
+import { IUserDbo } from '@app/utils/user/user';
 import {
   collection,
   Firestore,
@@ -17,10 +18,10 @@ export async function loadGameTemplates(
   return q.docs.map((d) => d.data() as IGameTemplateDbo);
 }
 
-export async function loadActiveGames(db: Firestore): Promise<IGameDbo[]> {
+export async function loadGamesByUserId(db: Firestore, uid: string): Promise<IGameDbo[]> {
   const docRef = collection(db, 'LiveGames');
   const q = await getDocs(
-    query(docRef, where('ownerId', '==', 'DefaultUser'), limit(10))
+    query(docRef, where('ownerId', '==', uid))
   );
   return q.docs.map((d) => d.data() as IGameDbo);
 }

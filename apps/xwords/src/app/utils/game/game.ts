@@ -1,23 +1,24 @@
-import { getGameTemplateDbo } from '@app/services/firebase/gameTemplate';
+import { getGameTemplateDbo } from '@app/services/firebase';
 import { Firestore } from 'firebase/firestore';
 import { generateUUID } from 'three/src/math/MathUtils';
+import { ICoordinates } from '../utils';
 import { GameFactory } from './gameFactory';
 import { IGameTemplateDbo } from './gameTemplate';
 import { Question } from './question';
-import { ICoordinates } from './utils';
 
 export enum GameStatus {
-  IN_PROGRESS,
-  COMPLETED,
+  IN_PROGRESS = "IN_PROGRESS",
+  COMPLETED = "COMPLETED",
 }
 export type IBoardState = Array<Array<string>>;
 export interface IGame {
+  id: string
   ownerId: string;
   gameTemplateId: string;
   status: GameStatus;
 }
 export interface IGameDbo extends IGame {
-  id: string;
+  actions: string[]
 }
 
 export class Game implements IGame {
@@ -37,7 +38,6 @@ export class Game implements IGame {
     game.id = props.id
     game.gameTemplateId = props.gameTemplateId;
     game.status = props.status;
-    console.log(game);
     return game;
   }
 
