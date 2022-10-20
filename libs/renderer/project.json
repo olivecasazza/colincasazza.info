@@ -4,8 +4,20 @@
   "sourceRoot": "libs/renderer/src",
   "targets": {
     "build": {
-      "executor": "@nxrs/cargo:build",
-      "options": {}
+      "executor": "@nrwl/workspace:run-commands",
+      "options": {
+        "cwd": "libs/renderer",
+        "commands": [
+          "wasm-pack build --debug --target web"
+        ]
+      },
+      "configurations": {
+        "production": {
+          "commands": [
+            "wasm-pack build --target web"
+          ]
+        }
+      }
     },
     "test": {
       "executor": "@nxrs/cargo:test",

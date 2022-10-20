@@ -36,6 +36,12 @@ export default class ProjectsWrapper extends Vue {
           sourceCodeLink:
             'https://github.com/colanzio5/colincasazza.info/tree/wasm-flock/wasm/src/flock',
         },
+        {
+          heading: "bevy",
+          text: "testing becy renderer",
+          link: '/projects/bevy/flock',
+          sourceCodeLink: "n/a"
+        }
       ],
     },
     {
@@ -49,6 +55,7 @@ export default class ProjectsWrapper extends Vue {
         },
       ],
     },
+  
   ];
 }
 </script>

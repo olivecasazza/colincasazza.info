@@ -17,7 +17,7 @@
     "paths": {
       "@libs/*": ["libs/*"],
       "@theme": ["libs/theme/src/index.ts"],
-      "@wasm": ["libs/wasm/src/index.ts"]
+      "@flock": ["libs/flock/src/index.ts"]
     }
   },
   "exclude": ["node_modules", "tmp"]

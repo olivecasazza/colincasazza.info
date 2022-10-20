@@ -22,7 +22,7 @@ export default defineConfig({
     Components({
       dirs: ['src/app/components'],
     }),
-    wasmPack([`${path.resolve(__dirname, '../../libs/wasm/')}/`,]), 
+    wasmPack([`${path.resolve(__dirname, '../../libs/flock/')}/`,]), 
     viteCommonjs()
   ],
 });

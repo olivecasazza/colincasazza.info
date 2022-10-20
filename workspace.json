@@ -2,11 +2,10 @@
   "$schema": "./node_modules/nx/schemas/workspace-schema.json",
   "version": 2,
   "projects": {
+    "xwords": "apps/xwords",
     "colincasazza.info": "apps/colincasazza.info",
     "flock": "libs/flock",
     "renderer": "libs/renderer",
-    "theme": "libs/theme",
-    "wasm": "libs/wasm",
-    "xwords": "apps/xwords"
+    "theme": "libs/theme"
   }
 }

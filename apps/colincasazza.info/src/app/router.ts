@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@app/views/HomeView.vue';
 import Projects from '@app/views/ProjectsWrapper.vue';
+import BevyFlock from '@app/views/BevyFlock.vue';
 import BackgroundGUI from '@app/views/background/BackgroundGUI.vue';
 import NotebookWrapper from '@app/components/NotebookWrapper.vue';
 
@@ -46,6 +47,12 @@ const router = createRouter({
       path: "/projects/three/flock",
       name: "Flock",
       component: BackgroundGUI,
+      meta: { title: 'colincasazza.info.flock' },
+    },
+    {
+      path: "/projects/bevy/flock",
+      name: "Flock",
+      component: BevyFlock,
       meta: { title: 'colincasazza.info.flock' },
     },
     {
