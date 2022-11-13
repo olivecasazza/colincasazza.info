@@ -23,13 +23,10 @@ import throttle from '@app/utils/lodash/throttle';
     ViewPortComponent: ViewPortComponent,
   },
 })
-export default class BackgroundWrapper extends Vue {
+export default class FlockView extends Vue {
   addBirdsToFlockInterval!: NodeJS.Timer | number;
   // variables for rendering flock
   view!: View;
-  birdsGeometry: any;
-  birdsMaterial: any;
-  birdsLine: any;
 
   get vxm() {
     return vxm;
@@ -49,36 +46,46 @@ export default class BackgroundWrapper extends Vue {
       },
       id: 'BACKGROUND_VIEW',
       background: new Color('black'),
-      renderTickCallback: this.renderTickCallback,
+      renderTickCallback: (_: View) => {
+        if (!vxm.flock.isMounted) return;
+        vxm.flock.updateFlock({
+          sceneWidth: this.view.visibleWidthAtZDepth,
+          sceneHeight: this.view.visibleHeightAtZDepth,
+          timeStep: vxm.flock.timeStep,
+          updateFlockGeometryCallback: this.updateFlockGeometry,
+        });
+      },
+      objects: {
+        line: new LineSegments(
+          new BufferGeometry(),
+          new LineBasicMaterial({
+            vertexColors: true,
+          })
+        ),
+      },
     });
-    this.birdsGeometry = new BufferGeometry();
-    this.birdsMaterial = new LineBasicMaterial({
-      vertexColors: true,
-    });
-    this.birdsLine = new LineSegments(this.birdsGeometry, this.birdsMaterial);
-    this.view.scene.add(this.birdsLine);
   }
 
-  async mounted() {
+  mounted() {
     window.addEventListener('touchstart', throttle(this.touchDrag, 10), false);
     window.addEventListener('touchmove', throttle(this.touchDrag, 10), false);
     window.addEventListener(
       'mousedown',
-      () => (vxm.background.isDragging = true),
+      () => (vxm.flock.isDragging = true),
       false
     );
     window.addEventListener('mousemove', throttle(this.mouseDrag, 10), false);
     window.addEventListener(
       'mouseup',
-      () => (vxm.background.isDragging = false),
+      () => (vxm.flock.isDragging = false),
       false
     );
     // add all the birds, but throttle it
     this.addBirdsToFlockInterval = setInterval(() => {
-      if (vxm.background.currentFlockSize > vxm.background.maxFlockSize) {
+      if (vxm.flock.currentFlockSize > vxm.flock.maxFlockSize) {
         clearInterval(this.addBirdsToFlockInterval as NodeJS.Timer);
       }
-      vxm.background.addBirdAtRandomPosition({
+      vxm.flock.addBirdAtRandomPosition({
         viewWidth: this.view.visibleWidthAtZDepth,
         viewHeight: this.view.visibleHeightAtZDepth,
       });
@@ -91,39 +98,39 @@ export default class BackgroundWrapper extends Vue {
     window.addEventListener('touchmove', throttle(this.touchDrag, 10), false);
     window.addEventListener(
       'mousedown',
-      () => (vxm.background.isDragging = true),
+      () => (vxm.flock.isDragging = true),
       false
     );
     window.addEventListener('mousemove', throttle(this.mouseDrag, 10), false);
     window.addEventListener(
       'mouseup',
-      () => (vxm.background.isDragging = false),
+      () => (vxm.flock.isDragging = false),
       false
     );
     clearInterval(this.addBirdsToFlockInterval as NodeJS.Timer);
     /** make sure we clean up the wasm resources
     can we write this into the flock free function */
-    // for (const config of vxm.background.birdConfigs) config.free();
-    vxm.background.unmounted();
+    // for (const config of vxm.flock.birdConfigs) config.free();
+    vxm.flock.unmounted();
   }
 
   updateFlockGeometry(vertices: Float32Array, colors: Float32Array) {
-    this.birdsLine.geometry.setAttribute(
+    this.view.objects.line.geometry.setAttribute(
       'position',
       new BufferAttribute(vertices, 3)
     );
-    this.birdsLine.geometry.setAttribute(
+    this.view.objects.line.geometry.setAttribute(
       'color',
       new BufferAttribute(colors, 3)
     );
   }
 
   renderTickCallback(_: View) {
-    if (!vxm.background.isMounted) return;
-    vxm.background.updateFlock({
+    if (!vxm.flock.isMounted) return;
+    vxm.flock.updateFlock({
       sceneWidth: this.view.visibleWidthAtZDepth,
       sceneHeight: this.view.visibleHeightAtZDepth,
-      timeStep: vxm.background.timeStep,
+      timeStep: vxm.flock.timeStep,
       updateFlockGeometryCallback: this.updateFlockGeometry,
     });
   }
@@ -135,7 +142,7 @@ export default class BackgroundWrapper extends Vue {
   }
 
   mouseDrag(event: MouseEvent) {
-    if (!vxm.background.isDragging || vxm.background.updating) return;
+    if (!vxm.flock.isDragging || vxm.flock.updating) return;
     this.addBirdFromEvent(event.x, event.y);
   }
 
@@ -146,7 +153,7 @@ export default class BackgroundWrapper extends Vue {
     const halfSceneHeight = this.view.visibleHeightAtZDepth / 2;
     const x = lerp(-halfSceneWidth, halfSceneWidth, normClickX);
     const y = -lerp(-halfSceneHeight, halfSceneHeight, normClickY);
-    vxm.background.addBirdAtPosition({ x, y });
+    vxm.flock.addBirdAtPosition({ x, y });
   }
 }
 </script>
