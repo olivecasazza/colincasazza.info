@@ -1,1 +1,0 @@
-import{_ as t}from"./NotebookWrapper.d9df6171.js";import{_ as e,j as n,o as a}from"./entry.0907ef29.js";const c={};function r(s,p){const o=t;return a(),n(o,{"notebook-path":"https://olivecasazza.github.io/notebooks-refresh/notebooks/?path=SDSU-CS556-Workspace%2Fa4%2Fp4.ipynb"},null,8,["notebook-path"])}const k=e(c,[["render",r]]);export{k as default};
